@@ -1,5 +1,4 @@
 
-Index · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -18,7 +17,19 @@ Index · HTML
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <span id="connStatus" class="conn-badge">connecting…</span>
       <button class="reset-btn" id="exportCsvBtn">Export CSV</button>
-      <button class="reset-btn" id="exportJsonBtn">Export JSON</button>
       <button class="reset-btn" id="resetBtn">Reset all</button>
     </div>
   </header>
+
+  <div class="board" id="board"></div>
+  <div id="categories"></div>
+  <button class="add-cat" id="addCatBtn">+ Add category</button>
+ 
+  <div class="overall">
+    <h2>Overall standing</h2>
+    <div id="ranking"></div>
+  </div>
+ 
+  <footer>Changes save automatically to the database.</footer>
+</div>
+ 
