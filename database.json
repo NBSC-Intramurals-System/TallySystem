@@ -13,12 +13,12 @@
       "points": { "gold": 30, "silver": 20, "bronze": 10 },
       "events": [
         { "id": "e1",  "name": "Bench Cheering",                    "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e2",  "name": "Basketball Men's",                  "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e3",  "name": "Basketball Women's",                "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e2",  "name": "Basketball Men",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e3",  "name": "Basketball Women",                "winners": { "gold": null, "silver": null, "bronze": null } },
         { "id": "e4",  "name": "Dance Sports (Latin Formation)",    "winners": { "gold": null, "silver": null, "bronze": null } },
         { "id": "e5",  "name": "Cheer Dance",                       "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e6",  "name": "Volleyball Men's",                  "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e7",  "name": "Volleyball Women's",                "winners": { "gold": null, "silver": null, "bronze": null } }
+        { "id": "e6",  "name": "Volleyball Men",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e7",  "name": "Volleyball Women",                "winners": { "gold": null, "silver": null, "bronze": null } }
       ]
     },
 
@@ -27,9 +27,34 @@
       "name": "Minor Categories",
       "points": { "gold": 15, "silver": 12, "bronze": 10 },
       "events": [
-        { "id": "e8",  "name": "Chess Men's (Individual)",          "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e9",  "name": "Chess Women's (Individual)",        "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e10", "name": "Chess Men's (Institute)",           "winners": { "gold": null, "silver": null, "bronze": null } }
+        { "id": "e8",  "name": "Chess Men (Individual)",                    "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e9",  "name": "Chess Women (Individual)",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e10", "name": "Chess Men (Institute)",                     "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e11", "name": "Chess Women (Institute)",                   "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e12", "name": "Mobile Legends Men (E-Sports)",             "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e13", "name": "Mobile Legends Women (E-Sports)",           "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e14", "name": "Tekken Mixed (E-Sports)",                   "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e15", "name": "Pickleball Men",                            "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e16", "name": "Pickleball Women",                          "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e17", "name": "Pickleball Mixed",                          "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e18", "name": "Sepaktakraw Men",                           "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e19", "name": "Sepaktakraw Women",                         "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e20", "name": "Table Tennis (Single Men)",                 "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e21", "name": "Table Tennis (Single Women)",               "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e22", "name": "Table Tennis (Double Men)",                 "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e23", "name": "Table Tennis (Double Women)",               "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e24", "name": "Taekwondo Men (Fin)",                       "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e25", "name": "Taekwondo Men (Fly)",                       "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e26", "name": "Taekwondo Men (Bantam)",                    "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e27", "name": "Taekwondo Men (Feather)",                   "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e28", "name": "Taekwondo Men (Welter)",                    "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e29", "name": "Taekwondo Men (Welter - Novice)",           "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e30", "name": "Taekwondo Women (Fin)",                     "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e31", "name": "Taekwondo Women (Fly)",                     "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e32", "name": "Taekwondo Women (Fly)",                     "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e33", "name": "Taekwondo Women (Bantam)",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e34", "name": "Taekwondo Women (Feather)",                 "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e35", "name": "Ultimate Frisbee Mixed",                    "winners": { "gold": null, "silver": null, "bronze": null } }
       ]
     },
     
@@ -38,12 +63,12 @@
       "name": "Traditional Games (Laro ng Lahi)",
       "points": { "gold": 10, "silver": 7, "bronze": 5 },
       "events": [
-        { "id": "e11", "name": "Banlak (Tug of War) Men's",         "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e12", "name": "Banlak (Tug of War) Women's",       "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e13", "name": "Patintero Men's",                   "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e14", "name": "Patintero Women's",                 "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e15", "name": "Sack Race Men's",                   "winners": { "gold": null, "silver": null, "bronze": null } },
-        { "id": "e16", "name": "Sack Race Women's",                 "winners": { "gold": null, "silver": null, "bronze": null } }
+        { "id": "e36", "name": "Tug of War Men",                    "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e37", "name": "Tug of War Women",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e38", "name": "Patintero Men",                     "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e39", "name": "Patintero Women",                   "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e40", "name": "Sack Race Men",                     "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e41", "name": "Sack Race Women",                   "winners": { "gold": null, "silver": null, "bronze": null } }
       ]
     }
   ]

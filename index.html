@@ -1,15 +1,24 @@
+
+Index · HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TALLY SHIT</title>
-
-   <h1>   </h1>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intramurals Tally Sheet</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
-
-</body>
-</html>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Intramurals Tally Sheet</h1>
+      <div class="sub">Assign medals per event — totals calculate automatically.</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span id="connStatus" class="conn-badge">connecting…</span>
+      <button class="reset-btn" id="exportCsvBtn">Export CSV</button>
+      <button class="reset-btn" id="exportJsonBtn">Export JSON</button>
+      <button class="reset-btn" id="resetBtn">Reset all</button>
+    </div>
+  </header>
