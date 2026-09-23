@@ -1,1 +1,1 @@
-# TallySystem
+# NBSC Intramurals Tally System
