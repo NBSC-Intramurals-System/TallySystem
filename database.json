@@ -1,0 +1,50 @@
+{
+    
+"institutes": [
+    { "id": "i1", "name": "Institute of Teacher Education",   "color": "#4f9ddb" },
+    { "id": "i2", "name": "Institute of Business Management", "color": "#fff601" },
+    { "id": "i3", "name": "Institute of Computer Studies",    "color": "#02ff3f" }
+  ],
+
+"categories": [
+    {
+      "id": "c1",
+      "name": "Major Categories",
+      "points": { "gold": 30, "silver": 20, "bronze": 10 },
+      "events": [
+        { "id": "e1",  "name": "Bench Cheering",                    "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e2",  "name": "Basketball Men's",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e3",  "name": "Basketball Women's",                "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e4",  "name": "Dance Sports (Latin Formation)",    "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e5",  "name": "Cheer Dance",                       "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e6",  "name": "Volleyball Men's",                  "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e7",  "name": "Volleyball Women's",                "winners": { "gold": null, "silver": null, "bronze": null } }
+      ]
+    },
+
+    {
+      "id": "c2",
+      "name": "Minor Categories",
+      "points": { "gold": 15, "silver": 12, "bronze": 10 },
+      "events": [
+        { "id": "e8",  "name": "Chess Men's (Individual)",          "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e9",  "name": "Chess Women's (Individual)",        "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e10", "name": "Chess Men's (Institute)",           "winners": { "gold": null, "silver": null, "bronze": null } }
+      ]
+    },
+    
+    {
+      "id": "c3",
+      "name": "Traditional Games (Laro ng Lahi)",
+      "points": { "gold": 10, "silver": 7, "bronze": 5 },
+      "events": [
+        { "id": "e11", "name": "Banlak (Tug of War) Men's",         "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e12", "name": "Banlak (Tug of War) Women's",       "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e13", "name": "Patintero Men's",                   "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e14", "name": "Patintero Women's",                 "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e15", "name": "Sack Race Men's",                   "winners": { "gold": null, "silver": null, "bronze": null } },
+        { "id": "e16", "name": "Sack Race Women's",                 "winners": { "gold": null, "silver": null, "bronze": null } }
+      ]
+    }
+  ]
+}
