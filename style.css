@@ -206,3 +206,31 @@ select.medal:focus{outline:none;border-color:var(--accent);}
   transition:border-color .15s ease, color .15s ease;
 }
 .add-cat:hover{border-color:var(--accent);color:var(--ink);}
+
+/*9.Overall Leaderboard or Standing Board*/
+.overall{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 22px;
+  box-shadow:var(--shadow-card);position:relative;overflow:hidden;
+}
+
+/*Gradient Border Masking Effect*/
+.overall::before{
+  content:"";position:absolute;inset:0;border-radius:18px;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg, var(--accent), transparent 45%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.5;
+}
+.overall h2{margin:0 0 14px;font-size:12px;color:var(--ink-dim);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+
+.rank{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+.rank:last-child{border-bottom:none;}
+
+.rank-left{display:flex;align-items:center;gap:11px;}
+
+.rank-num{width:26px;height:26px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;background:var(--bg);border:1px solid var(--line);font-family:'JetBrains Mono',monospace;}
+
+/*Campion or 1st place highlight styling*/
+.rank-num.first{background:var(--gold);color:#3a2a05;border-color:var(--gold);box-shadow:0 2px 8px rgba(232,182,76,.35);}
+
+.rank-score{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;}
