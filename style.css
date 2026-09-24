@@ -140,3 +140,69 @@ h1{font-size:clamp(22px,4vw,30px);font-weight:700;margin:0;letter-spacing:-0.01e
 /*Collapsible nga Body Wrapper*/
 .cat-body{padding:6px 12px 14px;}
 .cat.collapsed .cat-body{display:none;}
+
+/*7. Event Table Rows ug Medal Selection*/
+.row{
+  display:grid;grid-template-columns:1fr repeat(3,minmax(0,150px)) 30px;
+  gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line-soft);
+  border-radius:10px;transition:background .15s ease;
+}
+.row:hover{background:var(--panel-2);}
+.row:last-child{border-bottom:none;}
+
+/*Table Header Row Style*/
+.row.head{color:var(--ink-dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;padding-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.row.head:hover{background:none;}
+
+/*Mobile Layout Adapter para sa Event Rows*/
+@media (max-width:640px){
+  .row{grid-template-columns:1fr;gap:4px;padding:10px 8px;}
+  .row.head{display:none;}
+
+  /*Inject data label name in stacked mobile view sample kay Gold, Silver*/
+  .row .medal-cell::before{content:attr(data-label) ": ";color:var(--ink-dim);font-size:11px;}
+}
+
+/*Event Name Input Field*/
+.ev-name{
+  background:transparent;border:none;color:var(--ink);font-size:13.5px;padding:4px 2px;width:100%;
+  border-bottom:1px solid transparent;
+}
+.ev-name:focus{outline:none;border-bottom-color:var(--accent);}
+
+/*Medal Winner nga Dropdown Controls*/
+select.medal{
+  width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;
+  padding:6px 6px;font-size:12.5px;font-family:inherit;transition:border-color .15s ease;
+}
+select.medal:focus{outline:none;border-color:var(--accent);}
+
+/*I-remove row action button*/
+.rm-row{background:transparent;border:none;color:var(--ink-dim);cursor:pointer;font-size:15px;line-height:1;padding:4px;border-radius:6px;transition:color .15s ease;}
+.rm-row:hover{color:#e0625a;}
+
+/*Add Event Button sulod sa Category*/
+.add-row{
+  margin:10px 4px 2px;background:none;border:1px dashed var(--line);color:var(--ink-dim);
+  border-radius:10px;padding:8px 10px;font-size:12.5px;cursor:pointer;width:100%;text-align:left;
+  transition:border-color .15s ease, color .15s ease;
+}
+.add-row:hover{border-color:var(--accent);color:var(--ink);}
+
+/*8. Category Totals ug Global Catgeory Addition*/
+.cat-totals{
+  display:grid;grid-template-columns:1fr repeat(3,minmax(0,150px)) 30px;gap:8px;
+  padding:12px 6px 4px;margin-top:4px;border-top:1px solid var(--line);font-size:13px;font-weight:600;
+}
+@media (max-width:640px){.cat-totals{grid-template-columns:repeat(3,1fr);}}
+.cat-totals .tot-name{grid-column:1/2;color:var(--ink-dim);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+@media (max-width:640px){.cat-totals .tot-name{grid-column:1/-1;}}
+.tot-val{font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;}
+
+/*Global Add Category Button*/
+.add-cat{
+  background:none;border:1px dashed var(--line);color:var(--ink-dim);border-radius:16px;
+  padding:13px;width:100%;font-size:13.5px;cursor:pointer;margin-bottom:22px;
+  transition:border-color .15s ease, color .15s ease;
+}
+.add-cat:hover{border-color:var(--accent);color:var(--ink);}
