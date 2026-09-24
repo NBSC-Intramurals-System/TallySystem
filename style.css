@@ -112,3 +112,18 @@ h1{font-size:clamp(22px,4vw,30px);font-weight:700;margin:0;letter-spacing:-0.01e
   background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;
   overflow:hidden;box-shadow:var(--shadow-card);
 }
+
+/*Cataegory Header bar*/
+.cat-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 18px;background:var(--panel-2);border-bottom:1px solid var(--line);
+  cursor:pointer;user-select:none;
+}
+.cat-title{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:9px;}
+
+/*Accent Indicator Dot nga naay Color-Mix Glow*/
+.cat-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);}
+
+/*Accordion Expand or Collapse Chevron Transition*/
+.chev{transition:transform .2s cubic-bezier(.22,1,.36,1);color:var(--ink-dim);display:inline-block;}
+.cat.collapsed .chev{transform:rotate(-90deg);}
