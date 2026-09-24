@@ -1,0 +1,251 @@
+/* 1. Import Font to use*/
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+/* 2. Root Design Tokens*/
+:root{
+
+  /*Color Palette Tokens*/
+  --bg:#0b1220;
+  --panel:#12192b;
+  --panel-2:#161f36;
+  --line:rgba(255,255,255,0.08);
+  --line-soft:rgba(255,255,255,0.05);
+  --ink:#eef1f8;
+  --ink-dim:#8996b3;
+
+  /*Medal ug Accent Tokens*/
+  --gold:#e8b64c;
+  --silver:#c3cbd6;
+  --bronze:#c7844a;
+  --accent:#6ee7d8;
+
+  /*Elevation & Lighting Effect*/
+  --shadow-card: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+
+  /*For Mobile Safe Area Padding*/
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+  box-sizing:border-box;
+}
+/*3. Themes (Ligt and Dark Attributes)*/
+/*Auto-switch to Light Theme based on System Setting (except dark is forced)*/
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#f2f4f9; --panel:#ffffff; --panel-2:#f7f8fc; --line:rgba(20,30,55,0.09); --line-soft:rgba(20,30,55,0.05);
+    --ink:#151d33; --ink-dim:#6b7690;
+    --shadow-card: 0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.06), inset 0 1px 0 rgba(255,255,255,.6);
+  }
+}
+/*Explicit Dark Theme Overrice via JS data attribute*/
+:root[data-theme="dark"]{
+  --bg:#0b1220; --panel:#12192b; --panel-2:#161f36; --line:rgba(255,255,255,0.08); --line-soft:rgba(255,255,255,0.05);
+  --ink:#eef1f8; --ink-dim:#8996b3;
+}
+
+/*4. Base Global Styles ug Background Gradient*/
+*{box-sizing:border-box;}
+
+/*I-prevent Headers from hiding anchor on devices with safe area top*/
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+html,body{height:100%;}
+
+body{
+  margin:0; color:var(--ink);
+
+  /*Multi-Layer radical background lighting*/
+  background:
+    radial-gradient(1100px 500px at 15% -10%, rgba(110,231,216,0.08), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(232,182,76,0.06), transparent 55%),
+    var(--bg);
+  font-family:'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+/*Utility Class - Monospaced Typography for Numerical ug Code Alignment*/
+.mono{font-family:'JetBrains Mono', ui-monospace, monospace;}
+
+/*Main App Layout Wrapper*/
+.wrap{max-width:980px;margin:0 auto;padding:32px 18px 80px;}
+
+/*Header Section*/
+header{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+h1{font-size:clamp(22px,4vw,30px);font-weight:700;margin:0;letter-spacing:-0.01em;}
+.sub{color:var(--ink-dim);font-size:13.5px;margin:5px 0 0;}
+
+/* 5. Institute scoreboard -> bento cards */
+.board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;
+}
+@media (max-width:640px){.board{grid-template-columns:1fr;}}
+.inst-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 18px;
+  position:relative;overflow:hidden;box-shadow:var(--shadow-card);
+  transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, border-color .25s ease;
+}
+
+/*Card hover uses dynamic CSS variable set inline via JS/HTML per institute*/
+.inst-card:hover{transform:translateY(-2px);border-color:var(--c);}
+
+/*Institute Color Badge Icon*/
+.inst-badge{
+  width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:14px;margin-bottom:12px;background:var(--c);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.35),
+    inset 0 -2px 6px rgba(0,0,0,.15),
+    0 2px 6px rgba(0,0,0,.18);
+}
+
+/*Editable or Focus Intitute name Input*/
+.inst-name{
+  width:100%;background:transparent;border:none;color:var(--ink);font-weight:600;font-size:14.5px;
+  padding:2px 0 9px;border-bottom:1px dashed var(--line);margin-bottom:10px;
+}
+.inst-name:focus{outline:none;border-color:var(--c);}
+
+/*Score Readout Display*/
+.inst-score{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-0.01em;}
+.inst-score-label{color:var(--ink-dim);font-size:11.5px;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:.06em;margin-top:2px;}
+
+/*6. Category Accordion Containers ug Point Configuration*/
+.cat{
+  background:var(--panel);border:1px solid var(--line);border-radius:16px;margin-bottom:14px;
+  overflow:hidden;box-shadow:var(--shadow-card);
+}
+
+/*Cataegory Header bar*/
+.cat-head{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:14px 18px;background:var(--panel-2);border-bottom:1px solid var(--line);
+  cursor:pointer;user-select:none;
+}
+.cat-title{font-weight:600;font-size:14.5px;display:flex;align-items:center;gap:9px;}
+
+/*Accent Indicator Dot nga naay Color-Mix Glow*/
+.cat-dot{width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0;box-shadow:0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);}
+
+/*Accordion Expand or Collapse Chevron Transition*/
+.chev{transition:transform .2s cubic-bezier(.22,1,.36,1);color:var(--ink-dim);display:inline-block;}
+.cat.collapsed .chev{transform:rotate(-90deg);}
+
+/*Medal Point Weight Configuration Pill*/
+.pts{display:flex;gap:6px;font-size:11.5px;}
+.pt-pill{padding:3px 9px;border-radius:20px;background:var(--bg);border:1px solid var(--line);font-family:'JetBrains Mono',monospace;}
+.pt-pill input{width:30px;background:transparent;border:none;color:var(--ink);font-weight:600;text-align:center;font-size:11.5px;font-family:inherit;}
+.pt-pill input:focus{outline:none;}
+
+/*Medal Classes */
+.g{color:var(--gold);} .s{color:var(--silver);} .b{color:var(--bronze);}
+
+/*Collapsible nga Body Wrapper*/
+.cat-body{padding:6px 12px 14px;}
+.cat.collapsed .cat-body{display:none;}
+
+/*7. Event Table Rows ug Medal Selection*/
+.row{
+  display:grid;grid-template-columns:1fr repeat(3,minmax(0,150px)) 30px;
+  gap:8px;align-items:center;padding:8px 6px;border-bottom:1px solid var(--line-soft);
+  border-radius:10px;transition:background .15s ease;
+}
+.row:hover{background:var(--panel-2);}
+.row:last-child{border-bottom:none;}
+
+/*Table Header Row Style*/
+.row.head{color:var(--ink-dim);font-size:10.5px;text-transform:uppercase;letter-spacing:.07em;padding-bottom:6px;font-family:'JetBrains Mono',monospace;}
+.row.head:hover{background:none;}
+
+/*Mobile Layout Adapter para sa Event Rows*/
+@media (max-width:640px){
+  .row{grid-template-columns:1fr;gap:4px;padding:10px 8px;}
+  .row.head{display:none;}
+
+  /*Inject data label name in stacked mobile view sample kay Gold, Silver*/
+  .row .medal-cell::before{content:attr(data-label) ": ";color:var(--ink-dim);font-size:11px;}
+}
+
+/*Event Name Input Field*/
+.ev-name{
+  background:transparent;border:none;color:var(--ink);font-size:13.5px;padding:4px 2px;width:100%;
+  border-bottom:1px solid transparent;
+}
+.ev-name:focus{outline:none;border-bottom-color:var(--accent);}
+
+/*Medal Winner nga Dropdown Controls*/
+select.medal{
+  width:100%;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;
+  padding:6px 6px;font-size:12.5px;font-family:inherit;transition:border-color .15s ease;
+}
+select.medal:focus{outline:none;border-color:var(--accent);}
+
+/*I-remove row action button*/
+.rm-row{background:transparent;border:none;color:var(--ink-dim);cursor:pointer;font-size:15px;line-height:1;padding:4px;border-radius:6px;transition:color .15s ease;}
+.rm-row:hover{color:#e0625a;}
+
+/*Add Event Button sulod sa Category*/
+.add-row{
+  margin:10px 4px 2px;background:none;border:1px dashed var(--line);color:var(--ink-dim);
+  border-radius:10px;padding:8px 10px;font-size:12.5px;cursor:pointer;width:100%;text-align:left;
+  transition:border-color .15s ease, color .15s ease;
+}
+.add-row:hover{border-color:var(--accent);color:var(--ink);}
+
+/*8. Category Totals ug Global Catgeory Addition*/
+.cat-totals{
+  display:grid;grid-template-columns:1fr repeat(3,minmax(0,150px)) 30px;gap:8px;
+  padding:12px 6px 4px;margin-top:4px;border-top:1px solid var(--line);font-size:13px;font-weight:600;
+}
+@media (max-width:640px){.cat-totals{grid-template-columns:repeat(3,1fr);}}
+.cat-totals .tot-name{grid-column:1/2;color:var(--ink-dim);font-weight:500;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:.05em;}
+@media (max-width:640px){.cat-totals .tot-name{grid-column:1/-1;}}
+.tot-val{font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;}
+
+/*Global Add Category Button*/
+.add-cat{
+  background:none;border:1px dashed var(--line);color:var(--ink-dim);border-radius:16px;
+  padding:13px;width:100%;font-size:13.5px;cursor:pointer;margin-bottom:22px;
+  transition:border-color .15s ease, color .15s ease;
+}
+.add-cat:hover{border-color:var(--accent);color:var(--ink);}
+
+/*9.Overall Leaderboard or Standing Board*/
+.overall{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:20px 22px;
+  box-shadow:var(--shadow-card);position:relative;overflow:hidden;
+}
+
+/*Gradient Border Masking Effect*/
+.overall::before{
+  content:"";position:absolute;inset:0;border-radius:18px;padding:1px;pointer-events:none;
+  background:linear-gradient(135deg, var(--accent), transparent 45%);
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite:xor; mask-composite:exclude; opacity:.5;
+}
+.overall h2{margin:0 0 14px;font-size:12px;color:var(--ink-dim);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+
+.rank{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid var(--line-soft);}
+.rank:last-child{border-bottom:none;}
+
+.rank-left{display:flex;align-items:center;gap:11px;}
+
+.rank-num{width:26px;height:26px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;background:var(--bg);border:1px solid var(--line);font-family:'JetBrains Mono',monospace;}
+
+/*Campion or 1st place highlight styling*/
+.rank-num.first{background:var(--gold);color:#3a2a05;border-color:var(--gold);box-shadow:0 2px 8px rgba(232,182,76,.35);}
+
+.rank-score{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;}
+
+/*10. Footer, Utility button ug Status badges*/
+footer{margin-top:20px;text-align:center;color:var(--ink-dim);font-size:11.5px;}
+
+.reset-btn{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:9px;
+  padding:7px 13px;font-size:12px;cursor:pointer;transition:border-color .15s ease, color .15s ease;}
+.reset-btn:hover{border-color:#e0625a;color:#e0625a;}
+
+/*Network or Realtime Connection Status Badge*/
+.conn-badge{
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border-radius:20px;
+  border:1px solid var(--line);color:var(--ink-dim);white-space:nowrap;
+}
+.conn-badge.ok{color:#5fae72;border-color:#5fae72;}
+.conn-badge.offline{color:#e0b23f;border-color:#e0b23f;}
