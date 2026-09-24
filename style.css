@@ -234,3 +234,18 @@ select.medal:focus{outline:none;border-color:var(--accent);}
 .rank-num.first{background:var(--gold);color:#3a2a05;border-color:var(--gold);box-shadow:0 2px 8px rgba(232,182,76,.35);}
 
 .rank-score{font-weight:700;font-size:18px;font-variant-numeric:tabular-nums;font-family:'JetBrains Mono',monospace;}
+
+/*10. Footer, Utility button ug Status badges*/
+footer{margin-top:20px;text-align:center;color:var(--ink-dim);font-size:11.5px;}
+
+.reset-btn{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:9px;
+  padding:7px 13px;font-size:12px;cursor:pointer;transition:border-color .15s ease, color .15s ease;}
+.reset-btn:hover{border-color:#e0625a;color:#e0625a;}
+
+/*Network or Realtime Connection Status Badge*/
+.conn-badge{
+  font-family:'JetBrains Mono',monospace;font-size:11px;padding:5px 10px;border-radius:20px;
+  border:1px solid var(--line);color:var(--ink-dim);white-space:nowrap;
+}
+.conn-badge.ok{color:#5fae72;border-color:#5fae72;}
+.conn-badge.offline{color:#e0b23f;border-color:#e0b23f;}
