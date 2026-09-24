@@ -37,3 +37,37 @@
     --shadow-card: 0 1px 2px rgba(20,30,60,.04), 0 8px 24px rgba(20,30,60,.06), inset 0 1px 0 rgba(255,255,255,.6);
   }
 }
+/*Explicit Dark Theme Overrice via JS data attribute*/
+:root[data-theme="dark"]{
+  --bg:#0b1220; --panel:#12192b; --panel-2:#161f36; --line:rgba(255,255,255,0.08); --line-soft:rgba(255,255,255,0.05);
+  --ink:#eef1f8; --ink-dim:#8996b3;
+}
+
+/*4. Base Global Styles ug Background Gradient*/
+*{box-sizing:border-box;}
+
+/*I-prevent Headers from hiding anchor on devices with safe area top*/
+html{scroll-padding-top:env(safe-area-inset-top,0px);}
+html,body{height:100%;}
+
+body{
+  margin:0; color:var(--ink);
+
+  /*Multi-Layer radical background lighting*/
+  background:
+    radial-gradient(1100px 500px at 15% -10%, rgba(110,231,216,0.08), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(232,182,76,0.06), transparent 55%),
+    var(--bg);
+  font-family:'Space Grotesk', -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+/*Utility Class - Monospaced Typography for Numerical ug Code Alignment*/
+.mono{font-family:'JetBrains Mono', ui-monospace, monospace;}
+
+/*Main App Layout Wrapper*/
+.wrap{max-width:980px;margin:0 auto;padding:32px 18px 80px;}
+
+/*Header Section*/
+header{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
+h1{font-size:clamp(22px,4vw,30px);font-weight:700;margin:0;letter-spacing:-0.01em;}
+.sub{color:var(--ink-dim);font-size:13.5px;margin:5px 0 0;}
