@@ -1,0 +1,30 @@
+/* 1. Import Font to use*/
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap');
+
+/* 2. Root Design Tokens*/
+:root{
+
+  /*Color Palette Tokens*/
+  --bg:#0b1220;
+  --panel:#12192b;
+  --panel-2:#161f36;
+  --line:rgba(255,255,255,0.08);
+  --line-soft:rgba(255,255,255,0.05);
+  --ink:#eef1f8;
+  --ink-dim:#8996b3;
+
+  /*Medal ug Accent Tokens*/
+  --gold:#e8b64c;
+  --silver:#c3cbd6;
+  --bronze:#c7844a;
+  --accent:#6ee7d8;
+
+  /*Elevation & Lighting Effect*/
+  --shadow-card: 0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.25), inset 0 1px 0 rgba(255,255,255,.04);
+
+  /*For Mobile Safe Area Padding*/
+  padding-top: env(safe-area-inset-top,0px);
+  padding-bottom: env(safe-area-inset-bottom,0px);
+  box-sizing:border-box;
+}
