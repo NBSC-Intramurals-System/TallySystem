@@ -71,3 +71,14 @@ body{
 header{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start;justify-content:space-between;margin-bottom:22px;}
 h1{font-size:clamp(22px,4vw,30px);font-weight:700;margin:0;letter-spacing:-0.01em;}
 .sub{color:var(--ink-dim);font-size:13.5px;margin:5px 0 0;}
+
+/* 5. Institute scoreboard -> bento cards */
+.board{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:22px;
+}
+@media (max-width:640px){.board{grid-template-columns:1fr;}}
+.inst-card{
+  background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:16px 18px;
+  position:relative;overflow:hidden;box-shadow:var(--shadow-card);
+  transition:transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s ease, border-color .25s ease;
+}
