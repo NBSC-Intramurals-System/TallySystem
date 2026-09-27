@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Intramurals Tally Sheet</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* Institute management additions (kept here so style.css stays untouched) */
+  .inst-card{position:relative;}
+  .inst-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:12px;}
+  .inst-del:hover{background:#a14e4c;color:#fff;}
+  .inst-color{position:absolute;top:8px;left:8px;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;}
+  #addInstBtn{margin:4px 0 16px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+    <!--Top Navigation Header-->
+  <header>
+    <div>
+      <h1>Intramurals Tally Sheet</h1>
+      <div class="sub">Assign medals per event — Totals calculate automatically.</div>
+    </div>
+    <!--Global Action Controls ug Sync Status-->
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span id="connStatus" class="conn-badge">connecting…</span>
+      <button class="reset-btn" id="exportCsvBtn">Export CSV</button>
+      <button class="reset-btn" id="exportJsonBtn">Export JSON</button>
+      <button class="reset-btn" id="resetBtn">Reset all</button>
+    </div>
+  </header>
+
+  <!--Institute Bento Scoreboard Cards-->
+  <div class="board" id="board"></div>
+  <button class="add-cat" id="addInstBtn">+ Add institute</button>
+
+  <!--Dynamic Category ug Event Accordion List-->
+  <div id="categories"></div>
+  <button class="add-cat" id="addCatBtn">+ Add category</button>
+
+  <!--Overall Ranking nga Leaderboard-->
+  <div class="overall">
+    <h2>Overall standing</h2>
+    <div id="ranking"></div>
+  </div>
+
+  <footer>Changes save automatically to the database.</footer>
+</div>
+
+<script>
+//backend API endpoint ug Predefined Institute theme Color Palette
+const API_URL = "api.php";
+const PALETTE = ["#4f9ddb","#e0b23f","#5fae72","#b479c9","#d97757","#3fb8af","#e06c9f","#8a9a5b"];
+
+// ---- Backend calls ------------------------------------------------
+
+/*Fetch tally sheet*/
+async function apiGetState(){
+  const res = await fetch(`${API_URL}?action=state`);
+  if(!res.ok) throw new Error("bad response " + res.status);
+  return await res.json();
+}
+
+/*Submit mutation actions to api.php*/
+async function apiPost(action, body={}){
+  try{
+    const res = await fetch(API_URL, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({action, ...body})
+    });
+    if(!res.ok) throw new Error("request failed " + res.status);
+    return await res.json();
+  }catch(e){
+    console.warn("API call failed:", action, e);
+    return null;
+  }
+}
+
+/*Rate-limiter helper to rpevent flooding the API on rapid keysttrokes*/
+function debounce(fn, delay=500){
+  let t;
+  return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), delay); };
+}
+/*Update visual indicator for db coonecctivity vs local offline fallback*/
+function setConnStatus(connected){
+  const el = document.getElementById('connStatus');
+  if(!connected){
+    el.textContent = "no database — saved in this browser";
+    el.className = "conn-badge offline";
+  }else{
+    el.textContent = "saving to database.json";
+    el.className = "conn-badge ok";
+  }
+}
+
+// ---- Default data (used when api.php is unreachable, and by Reset) --
+function defaultState(){
+  let n = 0;
+  const mk = names => names.map(name=>({
+    id:"e"+(++n), name, winners:{gold:null,silver:null,bronze:null}
+  }));
+  return {
+    institutes: [
+      {id:"i1", name:"Institute of Teacher Education", color:PALETTE[0]},
+      {id:"i2", name:"Institute of Business Management", color:PALETTE[1]},
+      {id:"i3", name:"Institute of Computer Studies", color:PALETTE[2]},
+    ],
+    categories: [
+      {
+        id:"c1", name:"Major Categories", collapsed:false,
+        points:{gold:30, silver:20, bronze:10},
+        events: mk([
+          "Bench Cheering","Basketball Men","Basketball Women",
+          "Dance Sports (Latin Formation)","Cheer Dance",
+          "Volleyball Men","Volleyball Women"
+        ])
+      },
+
+      {
+        id:"c2", name:"Minor Categories", collapsed:false,
+        points:{gold:15, silver:12, bronze:10},
+        events: mk([
+          "Chess Men (Individual)","Chess Women (Individual)",
+          "Chess Men (Institute)","Chess Women (Institute)",
+          "Mobile Legends Men (E-Sports)","Mobile Legends Women (E-Sports)",
+          "Tekken Mixed (E-Sports)",
+          "Pickleball Men","Pickleball Women","Pickleball Mixed",
+          "Sepaktakraw Men","Sepaktakraw Women",
+          "Table Tennis (Single Men)","Table Tennis (Single Women)",
+          "Table Tennis (Double Men)","Table Tennis (Double Women)",
+          "Taekwondo Men (Fin)","Taekwondo Men (Fly)","Taekwondo Men (Bantam)",
+          "Taekwondo Men (Feather)","Taekwondo Men (Welter)","Taekwondo Men (Welter - Novice)",
+          "Taekwondo Women (Fin)","Taekwondo Women (Fly)","Taekwondo Women (Bantam)",
+          "Taekwondo Women (Feather)",
+          "Ultimate Frisbee Mixed"
+        ])
+      },
+      {
+        id:"c3", name:"Traditional Games (Laro ng Lahi)", collapsed:false,
+        points:{gold:10, silver:7, bronze:5},
+        events: mk([
+          "Tug of War Men","Tug of War Women",
+          "Patintero Men","Patintero Women",
+          "Sack Race Men","Sack Race Women"
+        ])
+      }
+    ]
+  };
+}
+
+let state = null;
+
+// ---- Local save (keeps data after refresh / closing the browser) ----
+const LS_KEY = "intramurals-tally-v1";
+function saveLocal(){
+  if(!state) return;
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      institutes: state.institutes,
+      categories: state.categories.map(({collapsed, ...c})=>c)
+    }));
+  }catch(e){ console.warn("Could not save locally:", e); }
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    if(!d || !Array.isArray(d.institutes) || !Array.isArray(d.categories)) return null;
+    return { institutes: d.institutes, categories: d.categories.map(c=>({...c, collapsed:false})) };
+  }catch(e){ return null; }
+}
+
+/*Try API first, falls back to local storage or sa defaults*/
+async function load(){
+  try{
+    const data = await apiGetState();
+    state = {
+      institutes: data.institutes,
+      categories: data.categories.map(c => ({...c, collapsed:false}))
+    };
+    setConnStatus(true);
+  }catch(e){
+    console.warn("Could not reach api.php, using data saved in this browser:", e);
+    state = loadLocal() || defaultState();
+    setConnStatus(false);
+  }
+}
+
+function uid(prefix){ return prefix + Math.random().toString(36).slice(2,9); }
+
+/*Score Computation Engine*/
+function instituteScore(instId){
+  let total = 0;
+  state.categories.forEach(cat=>{
+    total += categoryScoreFor(cat, instId);
+  });
+  return total;
+}
+/*Calculate total point eraned by Institute within specific category*/
+function categoryScoreFor(cat, instId){
+  let total = 0;
+  cat.events.forEach(ev=>{
+    if(ev.winners.gold === instId) total += Number(cat.points.gold)||0;
+    if(ev.winners.silver === instId) total += Number(cat.points.silver)||0;
+    if(ev.winners.bronze === instId) total += Number(cat.points.bronze)||0;
+  });
+  return total;
+}
+
+/*Main Render Controller ug Dom Builders*/
+function render(){
+  renderBoard();
+  renderCategories();
+  renderRanking();
+}
+
+/*Render top Institute Bento Cards*/
+function renderBoard(){
+  const board = document.getElementById('board');
+  board.innerHTML = '';
+  state.institutes.forEach(inst=>{
+    const card = document.createElement('div');
+    card.className = 'inst-card';
+    card.style.setProperty('--c', inst.color);
+    const score = instituteScore(inst.id);
+    const initial = (inst.name.trim()[0] || "?").toUpperCase();
+    card.innerHTML = `
+      <input type="color" class="inst-color" data-inst="${inst.id}" value="${escAttr(inst.color)}" title="Change color">
+      <button class="inst-del" data-inst="${inst.id}" title="Delete institute">✕</button>
+      <div class="inst-badge">${initial}</div>
+      <input class="inst-name" value="${escAttr(inst.name)}" data-inst="${inst.id}">
+      <div class="inst-score">${score}</div>
+      <div class="inst-score-label">Total points</div>
+    `;
+    board.appendChild(card);
+  });
+
+  // delete institute
+  board.querySelectorAll('.inst-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const inst = state.institutes.find(i=>i.id===btn.dataset.inst);
+      if(!inst) return;
+      if(!confirm(`Delete "${inst.name}"? Any medals it won will be cleared from all events.`)) return;
+      state.institutes = state.institutes.filter(i=>i.id!==inst.id);
+      state.categories.forEach(c=>c.events.forEach(ev=>{
+        ['gold','silver','bronze'].forEach(m=>{ if(ev.winners[m]===inst.id) ev.winners[m]=null; });
+      }));
+      render();
+      apiPost('remove_institute', {id: inst.id});
+    });
+  });
+
+  // change institute color
+  board.querySelectorAll('.inst-color').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      e.target.closest('.inst-card').style.setProperty('--c', e.target.value);
+    });
+    inp.addEventListener('change', e=>{
+      const inst = state.institutes.find(i=>i.id===e.target.dataset.inst);
+      inst.color = e.target.value;
+      render();
+      apiPost('update_institute_color', {id: inst.id, color: inst.color});
+    });
+  });
+
+  // rename institute
+  board.querySelectorAll('.inst-name').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      const inst = state.institutes.find(i=>i.id===e.target.dataset.inst);
+      inst.name = e.target.value;
+      renderRanking();
+      const badge = e.target.closest('.inst-card').querySelector('.inst-badge');
+      if(badge) badge.textContent = (e.target.value.trim()[0] || "?").toUpperCase();
+      
+      // keep dropdown labels in sync without full re-render (avoid focus loss)
+      document.querySelectorAll(`select.medal`).forEach(sel=>{
+        const opt = sel.querySelector(`option[value="${inst.id}"]`);
+        if(opt) opt.textContent = inst.name;
+      });
+      saveInstituteName(inst.id, inst.name);
+    });
+  });
+}
+
+const saveInstituteName = debounce((id, name)=>{
+  apiPost('update_institute_name', {id, name});
+});
+
+/*Contruct dropdown for assigning medal-winning intitutes*/
+function medalSelect(ev, medal, catId){
+  const sel = document.createElement('select');
+  sel.className = 'medal';
+  sel.dataset.event = ev.id;
+  sel.dataset.medal = medal;
+  sel.dataset.cat = catId;
+  let opts = `<option value="">—</option>`;
+  state.institutes.forEach(inst=>{
+    const selected = ev.winners[medal] === inst.id ? 'selected' : '';
+    opts += `<option value="${inst.id}" ${selected}>${escHtml(inst.name)}</option>`;
+  });
+  sel.innerHTML = opts;
+  return sel;
+}
+
+/*Category containers, point inputs ug event tables*/
+function renderCategories(){
+  const container = document.getElementById('categories');
+  container.innerHTML = '';
+  state.categories.forEach(cat=>{
+    const catEl = document.createElement('div');
+    catEl.className = 'cat' + (cat.collapsed ? ' collapsed' : '');
+    catEl.dataset.cat = cat.id;
+
+    /*Category Header Element*/
+    const head = document.createElement('div');
+    head.className = 'cat-head';
+    head.innerHTML = `
+      <div class="cat-title"><span class="chev">▾</span><span class="cat-dot"></span><input class="ev-name cat-name-input" style="font-weight:600;font-size:14.5px;" value="${escAttr(cat.name)}"></div>
+      <div class="pts">
+        <span class="pt-pill g">G <input type="number" class="pt-input" data-k="gold" value="${cat.points.gold}"></span>
+        <span class="pt-pill s">S <input type="number" class="pt-input" data-k="silver" value="${cat.points.silver}"></span>
+        <span class="pt-pill b">B <input type="number" class="pt-input" data-k="bronze" value="${cat.points.bronze}"></span>
+      </div>
+    `;
+
+    /*Accordion Toggle*/
+    head.querySelector('.chev').parentElement.addEventListener('click', (e)=>{
+      if(e.target.tagName === 'INPUT') return;
+      cat.collapsed = !cat.collapsed;
+      render();
+    });
+    head.querySelector('.cat-name-input').addEventListener('click', e=>e.stopPropagation());
+    head.querySelector('.cat-name-input').addEventListener('input', e=>{
+      cat.name = e.target.value;
+      saveLocal();
+      saveCategory(cat);
+    });
+
+    /*category Medal Point*/
+    head.querySelectorAll('.pt-input').forEach(inp=>{
+      inp.addEventListener('click', e=>e.stopPropagation());
+      inp.addEventListener('input', e=>{
+        cat.points[e.target.dataset.k] = e.target.value;
+        renderBoard(); renderRanking();
+        updateCatTotals(catEl, cat);
+        saveCategory(cat);
+      });
+    });
+    catEl.appendChild(head);
+
+    const body = document.createElement('div');
+    body.className = 'cat-body';
+
+    /*Event Table Header*/
+    const headerRow = document.createElement('div');
+    headerRow.className = 'row head';
+    headerRow.innerHTML = `<div>Event</div><div>Gold</div><div>Silver</div><div>Bronze</div><div></div>`;
+    body.appendChild(headerRow);
+
+    /*Render Event Rows*/
+    cat.events.forEach(ev=>{
+      const row = document.createElement('div');
+      row.className = 'row';
+      const nameInp = document.createElement('input');
+      nameInp.className = 'ev-name';
+      nameInp.value = ev.name;
+      nameInp.addEventListener('input', e=>{ ev.name = e.target.value; saveLocal(); saveEventName(ev.id, ev.name); });
+      row.appendChild(nameInp);
+
+      /*Gold, Silvver, ug Bronze Selectors*/
+      ['gold','silver','bronze'].forEach(medal=>{
+        const cell = document.createElement('div');
+        cell.className = 'medal-cell';
+        cell.dataset.label = medal[0].toUpperCase()+medal.slice(1);
+        const sel = medalSelect(ev, medal, cat.id);
+        sel.addEventListener('change', e=>{
+          ev.winners[medal] = e.target.value || null;
+          renderBoard(); renderRanking();
+          updateCatTotals(catEl, cat);
+          apiPost('update_event_winner', {id: ev.id, medal, institute_id: ev.winners[medal]});
+        });
+        cell.appendChild(sel);
+        row.appendChild(cell);
+      });
+
+      /*Remove Event Button*/
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'rm-row';
+      rmBtn.textContent = '✕';
+      rmBtn.title = 'Remove event';
+      rmBtn.addEventListener('click', ()=>{
+        cat.events = cat.events.filter(x=>x.id !== ev.id);
+        render();
+        apiPost('remove_event', {id: ev.id});
+      });
+      row.appendChild(rmBtn);
+
+      body.appendChild(row);
+    });
+
+    /*Add Event Button inside Category*/
+    const addBtn = document.createElement('button');
+    addBtn.className = 'add-row';
+    addBtn.textContent = '+ Add event';
+    addBtn.addEventListener('click', async ()=>{
+      const res = await apiPost('add_event', {category_id: cat.id, name:'New event'});
+      const newId = res && res.id ? res.id : uid('e');
+      cat.events.push({id:newId, name:'New event', winners:{gold:null,silver:null,bronze:null}});
+      render();
+    });
+    body.appendChild(addBtn);
+
+    /*Subtotal Row Container*/
+    const totalsRow = document.createElement('div');
+    totalsRow.className = 'cat-totals';
+    body.appendChild(totalsRow);
+
+    catEl.appendChild(body);
+    container.appendChild(catEl);
+
+    updateCatTotals(catEl, cat);
+  });
+}
+
+/*Update category subtotal for all intitutes*/
+function updateCatTotals(catEl, cat){
+  const totalsRow = catEl.querySelector('.cat-totals');
+  let html = `<div class="tot-name">Subtotal</div>`;
+  state.institutes.forEach(inst=>{
+    html += `<div class="tot-val" style="color:${inst.color}">${categoryScoreFor(cat, inst.id)}</div>`;
+  });
+  html += `<div></div>`;
+  totalsRow.innerHTML = html;
+}
+
+/*Computer sorted scores ug updates Overall Leaderboard List*/
+function renderRanking(){
+  saveLocal();
+  const ranking = document.getElementById('ranking');
+  const rows = state.institutes.map(inst=>({inst, score: instituteScore(inst.id)}));
+  rows.sort((a,b)=> b.score - a.score);
+  ranking.innerHTML = rows.map((r,i)=>`
+    <div class="rank">
+      <div class="rank-left">
+        <div class="rank-num ${i===0 && r.score>0 ? 'first':''}">${i+1}</div>
+        <div style="color:${r.inst.color};font-weight:600;">${escHtml(r.inst.name)}</div>
+      </div>
+      <div class="rank-score">${r.score}</div>
+    </div>
+  `).join('');
+}
+
+
+function escHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function escAttr(s){ return escHtml(s); }
+
+// ---- Export ---------------------------------------------------------
+function instituteName(id){
+  if(!id) return "";
+  const inst = state.institutes.find(i=>i.id===id);
+  return inst ? inst.name : "";
+}
+function csvCell(v){
+  const s = String(v ?? "");
+  return /[",\n]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+}
+
+/*Build structured CSV text string containing result and leaderboards*/
+function buildResultsCsv(){
+  const lines = [["Category","Event","Gold","Silver","Bronze"].map(csvCell).join(",")];
+  state.categories.forEach(cat=>{
+    cat.events.forEach(ev=>{
+      lines.push([
+        cat.name, ev.name,
+        instituteName(ev.winners.gold), instituteName(ev.winners.silver), instituteName(ev.winners.bronze)
+      ].map(csvCell).join(","));
+    });
+  });
+  lines.push("");
+  lines.push(["Institute","Total Points","Rank"].map(csvCell).join(","));
+  const ranked = state.institutes
+    .map(inst=>({inst, score: instituteScore(inst.id)}))
+    .sort((a,b)=> b.score - a.score);
+  ranked.forEach((r,i)=>{
+    lines.push([r.inst.name, r.score, i+1].map(csvCell).join(","));
+  });
+  return lines.join("\r\n");
+}
+
+/*Trigger dynamic file download blob in browser*/
+function downloadBlob(content, filename, mime){
+  const blob = new Blob([content], {type: mime});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/*Attach export event listeners*/
+document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
+  const stamp = new Date().toISOString().slice(0,10);
+  downloadBlob(buildResultsCsv(), `intramurals-tally-results-${stamp}.csv`, 'text/csv;charset=utf-8;');
+});
+document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
+  const stamp = new Date().toISOString().slice(0,10);
+  const payload = { institutes: state.institutes, categories: state.categories.map(({collapsed, ...c})=>c) };
+  downloadBlob(JSON.stringify(payload, null, 2), `intramurals-tally-results-${stamp}.json`, 'application/json');
+});
+
+/*Debounced backend sync functions*/
+const saveCategory = debounce((cat)=>{
+  apiPost('update_category', {
+    id: cat.id, name: cat.name,
+    gold: cat.points.gold, silver: cat.points.silver, bronze: cat.points.bronze
+  });
+});
+const saveEventName = debounce((id, name)=>{
+  apiPost('update_event_name', {id, name});
+});
+
+/*Add Institute*/
+document.getElementById('addInstBtn').addEventListener('click', async ()=>{
+  const color = PALETTE[state.institutes.length % PALETTE.length];
+  const res = await apiPost('add_institute', {name:'New institute', color});
+  const newId = res && res.id ? res.id : uid('i');
+  state.institutes.push({id:newId, name:'New institute', color});
+  render();
+});
+
+/*Add category*/
+document.getElementById('addCatBtn').addEventListener('click', async ()=>{
+  const res = await apiPost('add_category', {name:'New category', gold:10, silver:7, bronze:5});
+  const newId = res && res.id ? res.id : uid('c');
+  state.categories.push({
+    id:newId, name:'New category', collapsed:false,
+    points:{gold:10,silver:7,bronze:5},
+    events:[]
+  });
+  render();
+});
+
+/*Global Reset*/
+document.getElementById('resetBtn').addEventListener('click', async ()=>{
+  if(!confirm('Reset all data to the default blank tally sheet? This cannot be undone.')) return;
+  const res = await apiPost('reset');
+  if(res && res.ok){
+    await load();
+  }else{
+    state = defaultState();
+  }
+  render();
+});
+
+/*Application Entry Point*/
+(async ()=>{
+  await load();
+  render();
+})();
+</script>
+</body>
+</html>
