@@ -99,6 +99,20 @@ $out = mutate($DB, function (&$db) use ($action, $body, $DEFAULT) {
       if ($i !== null && preg_match('/^#[0-9a-f]{6}$/i', $color)) $db['institutes'][$i]['color'] = $color;
       return ['ok' => true];
 
+    case 'update_institute_image':
+      $img = (string)($body['image'] ?? '');
+      $i = find_index($db['institutes'], $id);
+      if ($i !== null) {
+        if ($img === '') {
+          unset($db['institutes'][$i]['image']);
+        } elseif (strlen($img) <= 400000 && preg_match('#^data:image/(png|jpeg|webp|gif);base64,[A-Za-z0-9+/=]+$#', $img)) {
+          $db['institutes'][$i]['image'] = $img;
+        } else {
+          return ['ok' => false, 'error' => 'invalid or too large image'];
+        }
+      }
+      return ['ok' => true];
+
     case 'add_institute':
       $newId = next_id('i', array_column($db['institutes'], 'id'));
       $color = (string)($body['color'] ?? '');

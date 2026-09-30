@@ -16,8 +16,22 @@
   .inst-card{position:relative;}
   .inst-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:12px;}
   .inst-del:hover{background:#d9534f;color:#fff;}
-  .inst-color{position:absolute;top:8px;left:8px;width:26px;height:26px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;}
+  .inst-edit{position:absolute;bottom:10px;right:10px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:13px;}
+  .inst-edit:hover,.inst-edit.on{background:var(--c);color:#fff;}
+  .inst-edit-panel{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-2px 0 12px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);}
+  .inst-color{width:26px;height:26px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;}
+  .edit-color{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
   #addInstBtn{margin:4px 0 16px;}
+  .inst-pic-btn,.inst-pic-rm{height:26px;border:0;border-radius:13px;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;font-size:12px;line-height:26px;padding:0 10px;}
+  .inst-pic-btn:hover{background:var(--c);color:#fff;}
+  .inst-pic-rm:hover{background:#d9534f;color:#fff;}
+  .inst-badge{width:60px;height:60px;border-radius:16px;font-size:24px;margin-bottom:14px;}
+  .inst-badge.has-img{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent;}
+  .rank-avatar{width:60px;height:60px;border-radius:16px;background:var(--c);background-size:cover;background-position:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 6px rgba(0,0,0,.18);}
+  .rank-avatar.has-img{color:transparent;}
+  .inst-name[readonly]{border-bottom-color:transparent;cursor:default;}
+  .inst-save{margin-left:auto;height:26px;border:0;border-radius:13px;background:var(--c);color:#fff;cursor:pointer;font-size:12px;font-weight:600;line-height:26px;padding:0 14px;}
+  .inst-save:disabled{opacity:.75;cursor:default;}
 </style>
 </head>
 <body>
@@ -191,6 +205,7 @@ function render(){
   renderRanking();
 }
 
+const editingInst = new Set();   // institutes whose edit panel is open
 function renderBoard(){
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -201,10 +216,17 @@ function renderBoard(){
     const score = instituteScore(inst.id);
     const initial = (inst.name.trim()[0] || "?").toUpperCase();
     card.innerHTML = `
-      <input type="color" class="inst-color" data-inst="${inst.id}" value="${escAttr(inst.color)}" title="Change color">
+      <button class="inst-edit ${editingInst.has(inst.id) ? 'on' : ''}" data-inst="${inst.id}" type="button" title="Edit photo / color">✎</button>
+      <input type="file" class="inst-file" data-inst="${inst.id}" accept="image/*" hidden>
       <button class="inst-del" data-inst="${inst.id}" title="Delete institute">✕</button>
-      <div class="inst-badge">${initial}</div>
-      <input class="inst-name" value="${escAttr(inst.name)}" data-inst="${inst.id}">
+      <div class="inst-badge ${inst.image ? 'has-img' : ''}" data-inst="${inst.id}" ${inst.image ? `style="background-image:url('${escAttr(inst.image)}')"` : ''}>${inst.image ? '' : initial}</div>
+      ${editingInst.has(inst.id) ? `<div class="inst-edit-panel">
+        <button class="inst-pic-btn" type="button">${inst.image ? '🖼 Change ' : '🖼 Add '}</button>
+        ${inst.image ? `<button class="inst-pic-rm" data-inst="${inst.id}" type="button">Remove </button>` : ''}
+        <label class="edit-color">Color <input type="color" class="inst-color" data-inst="${inst.id}" value="${escAttr(inst.color)}"></label>
+        <button class="inst-save" data-inst="${inst.id}" type="button">Save</button>
+      </div>` : ''}
+      <input class="inst-name" value="${escAttr(inst.name)}" data-inst="${inst.id}" ${editingInst.has(inst.id) ? '' : 'readonly tabindex="-1"'}>
       <div class="inst-score">${score}</div>
       <div class="inst-score-label">Total points</div>
     `;
@@ -223,6 +245,60 @@ function renderBoard(){
       }));
       render();
       apiPost('remove_institute', {id: inst.id});
+    });
+  });
+
+  // institute picture (button or click on the badge)
+  board.querySelectorAll('.inst-edit').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.inst;
+      const opening = !editingInst.has(id);
+      if(opening) editingInst.add(id); else editingInst.delete(id);
+      renderBoard();
+      if(opening){
+        const nameInp = document.querySelector(`.inst-name[data-inst="${id}"]`);
+        if(nameInp){ nameInp.focus(); nameInp.setSelectionRange(nameInp.value.length, nameInp.value.length); }
+      }
+    });
+  });
+  board.querySelectorAll('.inst-save').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const inst = state.institutes.find(i=>i.id===btn.dataset.inst);
+      if(!inst) return;
+      btn.disabled = true;
+      saveLocal();
+      await Promise.all([
+        apiPost('update_institute_name',  {id: inst.id, name: inst.name}),
+        apiPost('update_institute_color', {id: inst.id, color: inst.color}),
+        apiPost('update_institute_image', {id: inst.id, image: inst.image || ''})
+      ]);
+      btn.textContent = 'Saved ✓';
+      setTimeout(()=>{ editingInst.delete(inst.id); renderBoard(); }, 700);
+    });
+  });
+  board.querySelectorAll('.inst-pic-btn').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      el.closest('.inst-card').querySelector('.inst-file').click();
+    });
+  });
+  board.querySelectorAll('.inst-file').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const inst = state.institutes.find(i=>i.id===e.target.dataset.inst);
+      try{
+        inst.image = await resizeImage(file, 160);
+      }catch(err){ alert('Could not read that image. Please try another file.'); return; }
+      render();
+      apiPost('update_institute_image', {id: inst.id, image: inst.image});
+    });
+  });
+  board.querySelectorAll('.inst-pic-rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const inst = state.institutes.find(i=>i.id===btn.dataset.inst);
+      inst.image = null;
+      render();
+      apiPost('update_institute_image', {id: inst.id, image: ''});
     });
   });
 
@@ -246,7 +322,7 @@ function renderBoard(){
       inst.name = e.target.value;
       renderRanking();
       const badge = e.target.closest('.inst-card').querySelector('.inst-badge');
-      if(badge) badge.textContent = (e.target.value.trim()[0] || "?").toUpperCase();
+      if(badge && !inst.image) badge.textContent = (e.target.value.trim()[0] || "?").toUpperCase();
       // keep dropdown labels in sync without full re-render (avoid focus loss)
       document.querySelectorAll(`select.medal`).forEach(sel=>{
         const opt = sel.querySelector(`option[value="${inst.id}"]`);
@@ -256,29 +332,36 @@ function renderBoard(){
     });
   });
 }
+// Crop to a centered square and shrink, so the saved picture stays small
+function resizeImage(file, size){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const side = Math.min(img.width, img.height);
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      canvas.getContext('2d').drawImage(img, (img.width-side)/2, (img.height-side)/2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
+}
 const saveInstituteName = debounce((id, name)=>{
   apiPost('update_institute_name', {id, name});
 });
 
-// Options for one medal dropdown. An institute already chosen for another
-// medal in the same event is hidden (the current selection is always kept).
+// Options for one medal dropdown. Every institute is always available,
+// even if it was already picked for another medal in the same event.
 function medalOptions(ev, medal){
-  const taken = ['gold','silver','bronze']
-    .filter(m => m !== medal)
-    .map(m => ev.winners[m])
-    .filter(Boolean);
   let opts = `<option value="">—</option>`;
   state.institutes.forEach(inst=>{
     const isCurrent = ev.winners[medal] === inst.id;
-    if(taken.includes(inst.id) && !isCurrent) return;
     opts += `<option value="${inst.id}" ${isCurrent ? 'selected' : ''}>${escHtml(inst.name)}</option>`;
   });
   return opts;
-}
-function refreshRowSelects(row, ev){
-  row.querySelectorAll('select.medal').forEach(sel=>{
-    sel.innerHTML = medalOptions(ev, sel.dataset.medal);
-  });
 }
 
 function medalSelect(ev, medal, catId){
@@ -355,7 +438,6 @@ function renderCategories(){
         const sel = medalSelect(ev, medal, cat.id);
         sel.addEventListener('change', e=>{
           ev.winners[medal] = e.target.value || null;
-          refreshRowSelects(row, ev);
           renderBoard(); renderRanking();
           updateCatTotals(catEl, cat);
           apiPost('update_event_winner', {id: ev.id, medal, institute_id: ev.winners[medal]});
@@ -419,6 +501,7 @@ function renderRanking(){
     <div class="rank">
       <div class="rank-left">
         <div class="rank-num ${i===0 && r.score>0 ? 'first':''}">${i+1}</div>
+        <div class="rank-avatar ${r.inst.image ? 'has-img' : ''}" style="--c:${r.inst.color};${r.inst.image ? `background-image:url('${escAttr(r.inst.image)}')` : ''}">${r.inst.image ? '' : escHtml((r.inst.name.trim()[0] || '?').toUpperCase())}</div>
         <div class="rank-name" style="--c:${r.inst.color}">${escHtml(r.inst.name)}</div>
       </div>
       <div class="rank-score">${r.score}</div>
@@ -491,7 +574,13 @@ document.getElementById('addInstBtn').addEventListener('click', async ()=>{
   const res = await apiPost('add_institute', {name:'New institute', color});
   const newId = res && res.id ? res.id : uid('i');
   state.institutes.push({id:newId, name:'New institute', color});
+  editingInst.add(newId);          // open the edit panel on the new card
   render();
+  const nameInp = document.querySelector(`.inst-name[data-inst="${newId}"]`);
+  if(nameInp){
+    nameInp.scrollIntoView({block:'center', behavior:'smooth'});
+    nameInp.focus(); nameInp.select();
+  }
 });
 
 document.getElementById('addCatBtn').addEventListener('click', async ()=>{
