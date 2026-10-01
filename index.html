@@ -997,28 +997,3 @@ const systemLight = window.matchMedia("(prefers-color-scheme: light)");
 function currentTheme(){
   return document.documentElement.getAttribute("data-theme") || (systemLight.matches ? "light" : "dark");
 }
-function updateThemeBtn(){
-  const btn = document.getElementById('themeBtn');
-  const next = currentTheme() === "light" ? "dark" : "light";
-  btn.textContent = next === "dark" ? "☾ Dark mode" : "☀ Light mode";
-  btn.title = "Switch to " + next + " mode";
-}
-document.getElementById('themeBtn').addEventListener('click', ()=>{
-  const next = currentTheme() === "light" ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", next);
-  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
-  updateThemeBtn();
-});
-systemLight.addEventListener("change", updateThemeBtn);
-updateThemeBtn();
-
-(async ()=>{
-  await load();
-  render();
-})();
-</script>
-</body>
-
-
-</html>
-
