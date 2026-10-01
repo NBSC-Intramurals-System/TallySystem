@@ -6,4 +6,3 @@ Automated Scoring -> Replaces paper tally sheets to prevent manual calculation e
 
 Real-Time Standings -> Updates overall team rankings, medal counts, and point totals instantly for judges, organizers, and students. 
 
-Secure Access -> Features role-based permissions for tabulators and committee members to input, verify, and audit event results.

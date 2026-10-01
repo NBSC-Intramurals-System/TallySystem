@@ -4,7 +4,55 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Intramurals Tally Sheet</title>
+<script>
+  /* Apply the saved theme before the page paints, so it doesn't flash */
+  (function(){ try{ var t = localStorage.getItem("intramurals-theme");
+    if(t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t);
+  }catch(e){} })();
+</script>
 <link rel="stylesheet" href="style.css">
+<style>
+  /* Institute management additions (kept here so style.css stays untouched) */
+  .inst-card{position:relative;}
+  .inst-del{position:absolute;top:8px;right:8px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:12px;}
+  .inst-del:hover{background:#d9534f;color:#fff;}
+  .inst-edit{position:absolute;bottom:10px;right:10px;width:24px;height:24px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:13px;}
+  .inst-edit:hover,.inst-edit.on{background:var(--c);color:#fff;}
+  .inst-edit-panel{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:-2px 0 12px;padding:8px;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);}
+  .inst-color{width:26px;height:26px;padding:0;border:0;border-radius:50%;background:none;cursor:pointer;}
+  .edit-color{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-dim);}
+  #addInstBtn{margin:4px 0 16px;}
+  .inst-pic-btn,.inst-pic-rm{height:26px;border:0;border-radius:13px;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;font-size:12px;line-height:26px;padding:0 10px;}
+  .inst-pic-btn:hover{background:var(--c);color:#fff;}
+  .inst-pic-rm:hover{background:#d9534f;color:#fff;}
+  .inst-badge{width:60px;height:60px;border-radius:16px;font-size:24px;margin-bottom:14px;}
+  .inst-badge.has-img{background-size:cover;background-position:center;background-repeat:no-repeat;color:transparent;}
+  .rank-avatar{width:60px;height:60px;border-radius:16px;background:var(--c);background-size:cover;background-position:center;flex-shrink:0;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:24px;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 2px 6px rgba(0,0,0,.18);}
+  .rank-avatar.has-img{color:transparent;}
+  .inst-name[readonly]{border-bottom-color:transparent;cursor:default;}
+  .inst-save{margin-left:auto;height:26px;border:0;border-radius:13px;background:var(--c);color:#fff;cursor:pointer;font-size:12px;font-weight:600;line-height:26px;padding:0 14px;}
+  .inst-save:disabled{opacity:.75;cursor:default;}
+
+  /* Move event up / down */
+  .row-actions{display:flex;align-items:center;justify-content:flex-end;gap:2px;}
+  .mv-row{display:none;background:transparent;border:none;color:var(--ink-dim);cursor:pointer;font-size:13px;line-height:1;padding:4px;border-radius:6px;transition:color .15s ease;}
+  body.reorder .mv-row{display:inline-block;}
+  .mv-row:hover:not(:disabled){color:var(--accent);}
+  .mv-row:disabled{opacity:.25;cursor:default;}
+  #reorderBtn.on{border-color:var(--accent);color:var(--accent);}
+
+  /* Drag & drop reordering */
+  .ev-cell{display:flex;align-items:center;gap:4px;min-width:0;}
+  .ev-cell .ev-name{flex:1;min-width:0;}
+  .drag-grip{flex-shrink:0;width:22px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink-dim);font-size:15px;line-height:1;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;}
+  .drag-grip:hover{color:var(--accent);background:var(--panel-2);}
+  .row.shiftable{transition:transform .15s ease;}
+  .row.dragging{position:relative;z-index:20;background:var(--panel-2);box-shadow:0 10px 28px rgba(0,0,0,.35);outline:1px solid var(--accent);transition:none;cursor:grabbing;will-change:transform;}
+  body.is-dragging{user-select:none;-webkit-user-select:none;cursor:grabbing;}
+  @media (min-width:641px){
+    body.reorder .row,body.reorder .cat-totals{grid-template-columns:1fr repeat(3,minmax(0,210px)) 124px;}
+  }
+</style>
 </head>
 <body>
 <div class="wrap">
@@ -14,14 +62,15 @@
       <div class="sub">Assign medals per event — totals calculate automatically.</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <span id="connStatus" class="conn-badge">connecting…</span>
+      <button class="reset-btn" id="reorderBtn" type="button" title="Show or hide the move up/down arrows">⇅ Reorder: Off</button>
+      <button class="reset-btn theme-btn" id="themeBtn" type="button"></button>
       <button class="reset-btn" id="exportCsvBtn">Export CSV</button>
-      <button class="reset-btn" id="exportJsonBtn">Export JSON</button>
       <button class="reset-btn" id="resetBtn">Reset all</button>
     </div>
   </header>
 
   <div class="board" id="board"></div>
+  <button class="add-cat" id="addInstBtn">+ Add institute</button>
   <div id="categories"></div>
   <button class="add-cat" id="addCatBtn">+ Add category</button>
 
@@ -30,12 +79,13 @@
     <div id="ranking"></div>
   </div>
 
-  <footer>Changes save automatically to the database.</footer>
+  <footer>All Rights Reserved 2026</footer>
+  <footer>Devs: Canopus, Yujin and Yyzu </footer>
 </div>
 
 <script>
 const API_URL = "api.php";
-const PALETTE = ["#4f9ddb","#e0b23f","#5fae72","#b479c9","#d97757"];
+const PALETTE = ["#4f9ddb","#e0b23f","#5fae72","#b479c9","#d97757","#3fb8af","#e06c9f","#8a9a5b"];
 
 // ---- Backend calls ------------------------------------------------
 async function apiGetState(){
@@ -61,19 +111,12 @@ function debounce(fn, delay=500){
   let t;
   return (...args)=>{ clearTimeout(t); t = setTimeout(()=>fn(...args), delay); };
 }
-function setConnStatus(connected){
-  const el = document.getElementById('connStatus');
-  if(!connected){
-    el.textContent = "demo mode — no database";
-    el.className = "conn-badge offline";
-  }else{
-    el.textContent = "connected to database";
-    el.className = "conn-badge ok";
-  }
-}
-
-// ---- Fallback sample data (used only if api.php is unreachable) ---
+// ---- Default data (used when api.php is unreachable, and by Reset) --
 function defaultState(){
+  let n = 0;
+  const mk = names => names.map(name=>({
+    id:"e"+(++n), name, winners:{gold:null,silver:null,bronze:null}
+  }));
   return {
     institutes: [
       {id:"i1", name:"Institute of Teacher Education", color:PALETTE[0]},
@@ -84,42 +127,66 @@ function defaultState(){
       {
         id:"c1", name:"Major Categories", collapsed:false,
         points:{gold:30, silver:20, bronze:10},
-        events: [
-          {id:"e1", name:"Bench Cheering", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e2", name:"Basketball Men's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e3", name:"Basketball Women's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e4", name:"Dance Sports (Latin Formation)", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e5", name:"Cheer Dance", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e6", name:"Volleyball Men's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e7", name:"Volleyball Women's", winners:{gold:null,silver:null,bronze:null}},
-        ]
+        events: mk([
+          "Bench Cheering","Basketball Men","Basketball Women",
+          "Dance Sports (Latin Formation)","Cheer Dance",
+          "Volleyball Men","Volleyball Women"
+        ])
       },
       {
         id:"c2", name:"Minor Categories", collapsed:false,
         points:{gold:15, silver:12, bronze:10},
-        events: [
-          {id:"e8", name:"Chess Men's (Individual)", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e9", name:"Chess Women's (Individual)", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e10", name:"Chess Men's (Institute)", winners:{gold:null,silver:null,bronze:null}},
-        ]
+        events: mk([
+          "Chess Men (Individual)","Chess Women (Individual)",
+          "Chess Men (Institute)","Chess Women (Institute)",
+          "Mobile Legends Men (E-Sports)","Mobile Legends Women (E-Sports)",
+          "Tekken Men (E-Sports)","Tekken Women (E-Sports)",
+          "Pickleball Men","Pickleball Women","Pickleball Mixed",
+          "Sepaktakraw Men","Sepaktakraw Women",
+          "Table Tennis (Single Men)","Table Tennis (Single Women)",
+          "Table Tennis (Double Men)","Table Tennis (Double Women)",
+          "Taekwondo Men (Fin)","Taekwondo Men (Fly)","Taekwondo Men (Bantam)",
+          "Taekwondo Men (Feather)","Taekwondo Men (Welter)","Taekwondo Men (Welter - Novice)",
+          "Taekwondo Women (Fin)","Taekwondo Women (Fly)","Taekwondo Women (Bantam)",
+          "Taekwondo Women (Feather)",
+          "Ultimate Frisbee Mixed"
+        ])
       },
       {
         id:"c3", name:"Traditional Games (Laro ng Lahi)", collapsed:false,
         points:{gold:10, silver:7, bronze:5},
-        events: [
-          {id:"e11", name:"Banlak (Tug of War) Men's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e12", name:"Banlak (Tug of War) Women's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e13", name:"Patintero Men's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e14", name:"Patintero Women's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e15", name:"Sack Race Men's", winners:{gold:null,silver:null,bronze:null}},
-          {id:"e16", name:"Sack Race Women's", winners:{gold:null,silver:null,bronze:null}},
-        ]
+        events: mk([
+          "Tug of War Men","Tug of War Women",
+          "Patintero Men","Patintero Women",
+          "Sack Race Men","Sack Race Women"
+        ])
       }
     ]
   };
 }
 
 let state = null;
+
+// ---- Local save (keeps data after refresh / closing the browser) ----
+const LS_KEY = "intramurals-tally-v1";
+function saveLocal(){
+  if(!state) return;
+  try{
+    localStorage.setItem(LS_KEY, JSON.stringify({
+      institutes: state.institutes,
+      categories: state.categories.map(({collapsed, ...c})=>c)
+    }));
+  }catch(e){ console.warn("Could not save locally:", e); }
+}
+function loadLocal(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(!raw) return null;
+    const d = JSON.parse(raw);
+    if(!d || !Array.isArray(d.institutes) || !Array.isArray(d.categories)) return null;
+    return { institutes: d.institutes, categories: d.categories.map(c=>({...c, collapsed:false})) };
+  }catch(e){ return null; }
+}
 
 async function load(){
   try{
@@ -128,11 +195,9 @@ async function load(){
       institutes: data.institutes,
       categories: data.categories.map(c => ({...c, collapsed:false}))
     };
-    setConnStatus(true);
   }catch(e){
-    console.warn("Could not reach api.php, using local sample data:", e);
-    state = defaultState();
-    setConnStatus(false);
+    console.warn("Could not reach api.php, using data saved in this browser:", e);
+    state = loadLocal() || defaultState();
   }
 }
 
@@ -161,6 +226,7 @@ function render(){
   renderRanking();
 }
 
+const editingInst = new Set();   // institutes whose edit panel is open
 function renderBoard(){
   const board = document.getElementById('board');
   board.innerHTML = '';
@@ -171,20 +237,113 @@ function renderBoard(){
     const score = instituteScore(inst.id);
     const initial = (inst.name.trim()[0] || "?").toUpperCase();
     card.innerHTML = `
-      <div class="inst-badge">${initial}</div>
-      <input class="inst-name" value="${escAttr(inst.name)}" data-inst="${inst.id}">
+      <button class="inst-edit ${editingInst.has(inst.id) ? 'on' : ''}" data-inst="${inst.id}" type="button" title="Edit photo / color">✎</button>
+      <input type="file" class="inst-file" data-inst="${inst.id}" accept="image/*" hidden>
+      <button class="inst-del" data-inst="${inst.id}" title="Delete institute">✕</button>
+      <div class="inst-badge ${inst.image ? 'has-img' : ''}" data-inst="${inst.id}" ${inst.image ? `style="background-image:url('${escAttr(inst.image)}')"` : ''}>${inst.image ? '' : initial}</div>
+      ${editingInst.has(inst.id) ? `<div class="inst-edit-panel">
+        <button class="inst-pic-btn" type="button">${inst.image ? '🖼 Change ' : '🖼 Add '}</button>
+        ${inst.image ? `<button class="inst-pic-rm" data-inst="${inst.id}" type="button">Remove </button>` : ''}
+        <label class="edit-color">Color <input type="color" class="inst-color" data-inst="${inst.id}" value="${escAttr(inst.color)}"></label>
+        <button class="inst-save" data-inst="${inst.id}" type="button">Save</button>
+      </div>` : ''}
+      <input class="inst-name" value="${escAttr(inst.name)}" data-inst="${inst.id}" ${editingInst.has(inst.id) ? '' : 'readonly tabindex="-1"'}>
       <div class="inst-score">${score}</div>
       <div class="inst-score-label">Total points</div>
     `;
     board.appendChild(card);
   });
+
+  // delete institute
+  board.querySelectorAll('.inst-del').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const inst = state.institutes.find(i=>i.id===btn.dataset.inst);
+      if(!inst) return;
+      if(!confirm(`Delete "${inst.name}"? Any medals it won will be cleared from all events.`)) return;
+      state.institutes = state.institutes.filter(i=>i.id!==inst.id);
+      state.categories.forEach(c=>c.events.forEach(ev=>{
+        ['gold','silver','bronze'].forEach(m=>{ if(ev.winners[m]===inst.id) ev.winners[m]=null; });
+      }));
+      render();
+      apiPost('remove_institute', {id: inst.id});
+    });
+  });
+
+  // institute picture (button or click on the badge)
+  board.querySelectorAll('.inst-edit').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const id = btn.dataset.inst;
+      const opening = !editingInst.has(id);
+      if(opening) editingInst.add(id); else editingInst.delete(id);
+      renderBoard();
+      if(opening){
+        const nameInp = document.querySelector(`.inst-name[data-inst="${id}"]`);
+        if(nameInp){ nameInp.focus(); nameInp.setSelectionRange(nameInp.value.length, nameInp.value.length); }
+      }
+    });
+  });
+  board.querySelectorAll('.inst-save').forEach(btn=>{
+    btn.addEventListener('click', async ()=>{
+      const inst = state.institutes.find(i=>i.id===btn.dataset.inst);
+      if(!inst) return;
+      btn.disabled = true;
+      saveLocal();
+      await Promise.all([
+        apiPost('update_institute_name',  {id: inst.id, name: inst.name}),
+        apiPost('update_institute_color', {id: inst.id, color: inst.color}),
+        apiPost('update_institute_image', {id: inst.id, image: inst.image || ''})
+      ]);
+      btn.textContent = 'Saved ✓';
+      setTimeout(()=>{ editingInst.delete(inst.id); renderBoard(); }, 700);
+    });
+  });
+  board.querySelectorAll('.inst-pic-btn').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      el.closest('.inst-card').querySelector('.inst-file').click();
+    });
+  });
+  board.querySelectorAll('.inst-file').forEach(inp=>{
+    inp.addEventListener('change', async e=>{
+      const file = e.target.files[0];
+      if(!file) return;
+      const inst = state.institutes.find(i=>i.id===e.target.dataset.inst);
+      try{
+        inst.image = await resizeImage(file, 160);
+      }catch(err){ alert('Could not read that image. Please try another file.'); return; }
+      render();
+      apiPost('update_institute_image', {id: inst.id, image: inst.image});
+    });
+  });
+  board.querySelectorAll('.inst-pic-rm').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const inst = state.institutes.find(i=>i.id===btn.dataset.inst);
+      inst.image = null;
+      render();
+      apiPost('update_institute_image', {id: inst.id, image: ''});
+    });
+  });
+
+  // change institute color
+  board.querySelectorAll('.inst-color').forEach(inp=>{
+    inp.addEventListener('input', e=>{
+      e.target.closest('.inst-card').style.setProperty('--c', e.target.value);
+    });
+    inp.addEventListener('change', e=>{
+      const inst = state.institutes.find(i=>i.id===e.target.dataset.inst);
+      inst.color = e.target.value;
+      render();
+      apiPost('update_institute_color', {id: inst.id, color: inst.color});
+    });
+  });
+
+  // rename institute
   board.querySelectorAll('.inst-name').forEach(inp=>{
     inp.addEventListener('input', e=>{
       const inst = state.institutes.find(i=>i.id===e.target.dataset.inst);
       inst.name = e.target.value;
       renderRanking();
       const badge = e.target.closest('.inst-card').querySelector('.inst-badge');
-      if(badge) badge.textContent = (e.target.value.trim()[0] || "?").toUpperCase();
+      if(badge && !inst.image) badge.textContent = (e.target.value.trim()[0] || "?").toUpperCase();
       // keep dropdown labels in sync without full re-render (avoid focus loss)
       document.querySelectorAll(`select.medal`).forEach(sel=>{
         const opt = sel.querySelector(`option[value="${inst.id}"]`);
@@ -194,9 +353,37 @@ function renderBoard(){
     });
   });
 }
+// Crop to a centered square and shrink, so the saved picture stays small
+function resizeImage(file, size){
+  return new Promise((resolve, reject)=>{
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = ()=>{
+      const side = Math.min(img.width, img.height);
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = size;
+      canvas.getContext('2d').drawImage(img, (img.width-side)/2, (img.height-side)/2, side, side, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      resolve(canvas.toDataURL(file.type === 'image/png' ? 'image/png' : 'image/jpeg', 0.85));
+    };
+    img.onerror = ()=>{ URL.revokeObjectURL(url); reject(new Error('bad image')); };
+    img.src = url;
+  });
+}
 const saveInstituteName = debounce((id, name)=>{
   apiPost('update_institute_name', {id, name});
 });
+
+// Options for one medal dropdown. Every institute is always available,
+// even if it was already picked for another medal in the same event.
+function medalOptions(ev, medal){
+  let opts = `<option value="">—</option>`;
+  state.institutes.forEach(inst=>{
+    const isCurrent = ev.winners[medal] === inst.id;
+    opts += `<option value="${inst.id}" ${isCurrent ? 'selected' : ''}>${escHtml(inst.name)}</option>`;
+  });
+  return opts;
+}
 
 function medalSelect(ev, medal, catId){
   const sel = document.createElement('select');
@@ -204,13 +391,91 @@ function medalSelect(ev, medal, catId){
   sel.dataset.event = ev.id;
   sel.dataset.medal = medal;
   sel.dataset.cat = catId;
-  let opts = `<option value="">—</option>`;
-  state.institutes.forEach(inst=>{
-    const selected = ev.winners[medal] === inst.id ? 'selected' : '';
-    opts += `<option value="${inst.id}" ${selected}>${escHtml(inst.name)}</option>`;
-  });
-  sel.innerHTML = opts;
+  sel.innerHTML = medalOptions(ev, medal);
   return sel;
+}
+
+// Move an event inside its category: 'up', 'down' (one step), 'top' or 'bottom'
+function moveEvent(cat, ev, where){
+  const i = cat.events.findIndex(x=>x.id === ev.id);
+  const last = cat.events.length - 1;
+  const j = where === 'up' ? i - 1 : where === 'down' ? i + 1 : where === 'top' ? 0 : last;
+  if(i < 0 || j < 0 || j > last || j === i) return;
+  const [item] = cat.events.splice(i, 1);
+  cat.events.splice(j, 0, item);
+  saveLocal();
+  render();
+  apiPost('move_event', {id: ev.id, direction: where});
+}
+
+// Drag & drop: hold the ⋮⋮ handle and drag an event to a new spot in its category
+function startDrag(e, row, cat, ev){
+  if(e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  const list = row.parentElement;
+  const rs = [...list.children].filter(el=> el.classList.contains('row') && !el.classList.contains('head'));
+  const fromIdx = rs.indexOf(row);
+  if(fromIdx < 0) return;
+
+  const sy = window.scrollY;
+  const centers = rs.map(r=>{ const b = r.getBoundingClientRect(); return b.top + sy + b.height/2; });
+  const dragH = row.getBoundingClientRect().height;
+  const startPageY = e.clientY + sy;
+  let lastClientY = e.clientY, toIdx = fromIdx, raf = 0;
+
+  row.classList.add('dragging');
+  rs.forEach(r=>{ if(r !== row) r.classList.add('shiftable'); });
+  document.body.classList.add('is-dragging');
+
+  function update(){
+    const dy = (lastClientY + window.scrollY) - startPageY;
+    row.style.transform = `translateY(${dy}px)`;
+    const c = centers[fromIdx] + dy;
+    let t = 0;
+    centers.forEach((cc, k)=>{ if(k !== fromIdx && cc < c) t++; });
+    toIdx = t;
+    rs.forEach((r, k)=>{
+      if(k === fromIdx) return;
+      let shift = 0;
+      if(fromIdx < toIdx && k > fromIdx && k <= toIdx) shift = -dragH;
+      else if(fromIdx > toIdx && k >= toIdx && k < fromIdx) shift = dragH;
+      r.style.transform = shift ? `translateY(${shift}px)` : '';
+    });
+  }
+  // auto-scroll the page when the pointer is near the top / bottom edge
+  function tick(){
+    const margin = 70;
+    let d = 0;
+    if(lastClientY < margin) d = -Math.ceil((margin - lastClientY) / 5);
+    else if(lastClientY > window.innerHeight - margin) d = Math.ceil((lastClientY - (window.innerHeight - margin)) / 5);
+    if(d){ window.scrollBy(0, d); update(); }
+    raf = requestAnimationFrame(tick);
+  }
+  function finish(commit){
+    cancelAnimationFrame(raf);
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onCancel);
+    document.body.classList.remove('is-dragging');
+    if(commit && toIdx !== fromIdx){
+      const [item] = cat.events.splice(fromIdx, 1);
+      cat.events.splice(toIdx, 0, item);
+      saveLocal();
+      render();
+      apiPost('move_event', {id: ev.id, direction: 'to', position: toIdx});
+    }else{
+      row.classList.remove('dragging');
+      rs.forEach(r=>{ r.classList.remove('shiftable'); r.style.transform = ''; });
+    }
+  }
+  function onMove(e2){ lastClientY = e2.clientY; update(); }
+  function onUp(){ finish(true); }
+  function onCancel(){ finish(false); }
+
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onCancel);
+  raf = requestAnimationFrame(tick);
 }
 
 function renderCategories(){
@@ -239,6 +504,7 @@ function renderCategories(){
     head.querySelector('.cat-name-input').addEventListener('click', e=>e.stopPropagation());
     head.querySelector('.cat-name-input').addEventListener('input', e=>{
       cat.name = e.target.value;
+      saveLocal();
       saveCategory(cat);
     });
     head.querySelectorAll('.pt-input').forEach(inp=>{
@@ -260,14 +526,23 @@ function renderCategories(){
     headerRow.innerHTML = `<div>Event</div><div>Gold</div><div>Silver</div><div>Bronze</div><div></div>`;
     body.appendChild(headerRow);
 
-    cat.events.forEach(ev=>{
+    cat.events.forEach((ev, idx)=>{
       const row = document.createElement('div');
       row.className = 'row';
       const nameInp = document.createElement('input');
       nameInp.className = 'ev-name';
       nameInp.value = ev.name;
-      nameInp.addEventListener('input', e=>{ ev.name = e.target.value; saveEventName(ev.id, ev.name); });
-      row.appendChild(nameInp);
+      nameInp.addEventListener('input', e=>{ ev.name = e.target.value; saveLocal(); saveEventName(ev.id, ev.name); });
+      const nameCell = document.createElement('div');
+      nameCell.className = 'ev-cell';
+      const grip = document.createElement('div');
+      grip.className = 'drag-grip';
+      grip.textContent = '⋮⋮';
+      grip.title = 'Hold and drag to move this event';
+      grip.addEventListener('pointerdown', e=> startDrag(e, row, cat, ev));
+      nameCell.appendChild(grip);
+      nameCell.appendChild(nameInp);
+      row.appendChild(nameCell);
 
       ['gold','silver','bronze'].forEach(medal=>{
         const cell = document.createElement('div');
@@ -284,6 +559,25 @@ function renderCategories(){
         row.appendChild(cell);
       });
 
+      const actions = document.createElement('div');
+      actions.className = 'row-actions';
+
+      const mkMove = (label, title, where, disabled)=>{
+        const b = document.createElement('button');
+        b.className = 'mv-row';
+        b.type = 'button';
+        b.textContent = label;
+        b.title = title;
+        b.disabled = disabled;
+        b.addEventListener('click', ()=> moveEvent(cat, ev, where));
+        return b;
+      };
+      const isFirst = idx === 0, isLast = idx === cat.events.length - 1;
+      actions.appendChild(mkMove('⤒', 'Move to top',    'top',    isFirst));
+      actions.appendChild(mkMove('▲', 'Move up',        'up',     isFirst));
+      actions.appendChild(mkMove('▼', 'Move down',      'down',   isLast));
+      actions.appendChild(mkMove('⤓', 'Move to bottom', 'bottom', isLast));
+
       const rmBtn = document.createElement('button');
       rmBtn.className = 'rm-row';
       rmBtn.textContent = '✕';
@@ -293,7 +587,9 @@ function renderCategories(){
         render();
         apiPost('remove_event', {id: ev.id});
       });
-      row.appendChild(rmBtn);
+      actions.appendChild(rmBtn);
+
+      row.appendChild(actions);
 
       body.appendChild(row);
     });
@@ -324,13 +620,14 @@ function updateCatTotals(catEl, cat){
   const totalsRow = catEl.querySelector('.cat-totals');
   let html = `<div class="tot-name">Subtotal</div>`;
   state.institutes.forEach(inst=>{
-    html += `<div class="tot-val" style="color:${inst.color}">${categoryScoreFor(cat, inst.id)}</div>`;
+    html += `<div class="tot-val" style="--c:${inst.color}">${categoryScoreFor(cat, inst.id)}</div>`;
   });
   html += `<div></div>`;
   totalsRow.innerHTML = html;
 }
 
 function renderRanking(){
+  saveLocal();
   const ranking = document.getElementById('ranking');
   const rows = state.institutes.map(inst=>({inst, score: instituteScore(inst.id)}));
   rows.sort((a,b)=> b.score - a.score);
@@ -338,7 +635,8 @@ function renderRanking(){
     <div class="rank">
       <div class="rank-left">
         <div class="rank-num ${i===0 && r.score>0 ? 'first':''}">${i+1}</div>
-        <div style="color:${r.inst.color};font-weight:600;">${escHtml(r.inst.name)}</div>
+        <div class="rank-avatar ${r.inst.image ? 'has-img' : ''}" style="--c:${r.inst.color};${r.inst.image ? `background-image:url('${escAttr(r.inst.image)}')` : ''}">${r.inst.image ? '' : escHtml((r.inst.name.trim()[0] || '?').toUpperCase())}</div>
+        <div class="rank-name" style="--c:${r.inst.color}">${escHtml(r.inst.name)}</div>
       </div>
       <div class="rank-score">${r.score}</div>
     </div>
@@ -394,11 +692,6 @@ document.getElementById('exportCsvBtn').addEventListener('click', ()=>{
   const stamp = new Date().toISOString().slice(0,10);
   downloadBlob(buildResultsCsv(), `intramurals-tally-results-${stamp}.csv`, 'text/csv;charset=utf-8;');
 });
-document.getElementById('exportJsonBtn').addEventListener('click', ()=>{
-  const stamp = new Date().toISOString().slice(0,10);
-  const payload = { institutes: state.institutes, categories: state.categories.map(({collapsed, ...c})=>c) };
-  downloadBlob(JSON.stringify(payload, null, 2), `intramurals-tally-results-${stamp}.json`, 'application/json');
-});
 
 const saveCategory = debounce((cat)=>{
   apiPost('update_category', {
@@ -408,6 +701,20 @@ const saveCategory = debounce((cat)=>{
 });
 const saveEventName = debounce((id, name)=>{
   apiPost('update_event_name', {id, name});
+});
+
+document.getElementById('addInstBtn').addEventListener('click', async ()=>{
+  const color = PALETTE[state.institutes.length % PALETTE.length];
+  const res = await apiPost('add_institute', {name:'New institute', color});
+  const newId = res && res.id ? res.id : uid('i');
+  state.institutes.push({id:newId, name:'New institute', color});
+  editingInst.add(newId);          // open the edit panel on the new card
+  render();
+  const nameInp = document.querySelector(`.inst-name[data-inst="${newId}"]`);
+  if(nameInp){
+    nameInp.scrollIntoView({block:'center', behavior:'smooth'});
+    nameInp.focus(); nameInp.select();
+  }
 });
 
 document.getElementById('addCatBtn').addEventListener('click', async ()=>{
@@ -431,6 +738,34 @@ document.getElementById('resetBtn').addEventListener('click', async ()=>{
   }
   render();
 });
+
+// ---- Reorder mode toggle (shows / hides the ▲ ▼ buttons) -------------
+document.getElementById('reorderBtn').addEventListener('click', e=>{
+  const on = document.body.classList.toggle('reorder');
+  e.currentTarget.classList.toggle('on', on);
+  e.currentTarget.textContent = '⇅ Reorder: ' + (on ? 'On' : 'Off');
+});
+
+// ---- Light / dark theme --------------------------------------------
+const THEME_KEY = "intramurals-theme";
+const systemLight = window.matchMedia("(prefers-color-scheme: light)");
+function currentTheme(){
+  return document.documentElement.getAttribute("data-theme") || (systemLight.matches ? "light" : "dark");
+}
+function updateThemeBtn(){
+  const btn = document.getElementById('themeBtn');
+  const next = currentTheme() === "light" ? "dark" : "light";
+  btn.textContent = next === "dark" ? "☾ Dark mode" : "☀ Light mode";
+  btn.title = "Switch to " + next + " mode";
+}
+document.getElementById('themeBtn').addEventListener('click', ()=>{
+  const next = currentTheme() === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", next);
+  try{ localStorage.setItem(THEME_KEY, next); }catch(e){}
+  updateThemeBtn();
+});
+systemLight.addEventListener("change", updateThemeBtn);
+updateThemeBtn();
 
 (async ()=>{
   await load();
