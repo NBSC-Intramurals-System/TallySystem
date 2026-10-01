@@ -41,6 +41,18 @@
   .mv-row:disabled{opacity:.25;cursor:default;}
   #reorderBtn.on{border-color:var(--accent);color:var(--accent);}
 
+  /* Medal icons (gold / silver / bronze) */
+  .medal-ico{display:block;flex-shrink:0;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35));}
+  .pt-pill{display:inline-flex;align-items:center;gap:5px;}
+  .medal-head{display:flex;align-items:center;gap:6px;}
+  .cell-medal{display:none;}
+  @media (max-width:640px){
+    .row .medal-cell{display:flex;align-items:center;gap:8px;}
+    .row .medal-cell::before{display:none;}
+    .cell-medal{display:inline-flex;}
+    .row .medal-cell select.medal{flex:1;min-width:0;}
+  }
+
   /* Drag & drop reordering */
   .ev-cell{display:flex;align-items:center;gap:4px;min-width:0;}
   .ev-cell .ev-name{flex:1;min-width:0;}
@@ -52,9 +64,56 @@
   @media (min-width:641px){
     body.reorder .row,body.reorder .cat-totals{grid-template-columns:1fr repeat(3,minmax(0,210px)) 124px;}
   }
+  /* Reveal the winner */
+  .overall-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px;}
+  .overall-head h2{margin:0;}
+  .reveal-btn{border:0;border-radius:10px;padding:9px 15px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;background:linear-gradient(135deg,#f9e08a,#e2b643);color:#3a2a05;box-shadow:0 2px 10px rgba(232,182,76,.35);transition:transform .15s ease,box-shadow .15s ease;}
+  .reveal-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,182,76,.5);}
+  .reveal-btn:active{transform:none;}
+
+  .reveal{position:fixed;inset:0;z-index:100;display:flex;padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(18px + env(safe-area-inset-bottom,0px));background:rgba(5,8,16,.84);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow-y:auto;}
+  .reveal[hidden]{display:none;}
+  .reveal-card{position:relative;z-index:1;margin:auto;width:min(560px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px 20px 18px;box-shadow:var(--shadow-card),0 20px 60px rgba(0,0,0,.45);}
+  .reveal-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;font-size:13px;line-height:1;}
+  .reveal-close:hover{background:#d9534f;color:#fff;}
+  .reveal-title{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 40px 6px 2px;}
+  .reveal-caption{min-height:30px;font-size:20px;font-weight:700;margin:0 2px 14px;letter-spacing:-.01em;}
+  .reveal-actions{display:flex;justify-content:center;margin-top:6px;}
+  .reveal-replay{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:9px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .reveal-replay:hover{border-color:var(--accent);color:var(--ink);}
+  #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
+
+  .rv-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:10px;border:1px dashed var(--line);border-radius:14px;background:var(--panel-2);opacity:.4;}
+  .rv-row.show{opacity:1;border-style:solid;animation:rvIn .7s cubic-bezier(.22,1,.36,1);}
+  .rv-row:not(.show) .rv-main,.rv-row:not(.show) .rv-score{visibility:hidden;}
+  .rv-rank{width:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rv-num{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 13px 'JetBrains Mono',monospace;background:var(--bg);border:1px solid var(--line);color:var(--ink-dim);}
+  .rv-main{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .rv-main .rank-avatar{width:44px;height:44px;font-size:18px;border-radius:12px;}
+  .rv-name{font-size:15px;min-width:0;overflow-wrap:anywhere;}
+  .rv-score{font:700 22px 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;}
+  .rv-trophy{display:none;font-size:20px;}
+  .rv-row.winner{background:linear-gradient(135deg,rgba(232,182,76,.24),var(--panel-2));border-color:var(--gold-fill);box-shadow:0 0 0 1px var(--gold-fill),0 0 34px rgba(232,182,76,.38);animation:rvGlow 1.8s ease-in-out infinite alternate;}
+  .rv-row.winner .rv-trophy{display:inline;animation:rvPop .7s cubic-bezier(.22,1,.36,1);}
+  @keyframes rvIn{0%{opacity:0;transform:translateY(28px) scale(.94);}60%{opacity:1;transform:translateY(-4px) scale(1.02);}100%{opacity:1;transform:none;}}
+  @keyframes rvGlow{from{box-shadow:0 0 0 1px var(--gold-fill),0 0 18px rgba(232,182,76,.25);}to{box-shadow:0 0 0 1px var(--gold-fill),0 0 38px rgba(232,182,76,.55);}}
+  @keyframes rvPop{0%{transform:scale(0) rotate(-30deg);}70%{transform:scale(1.3) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
+  @media (prefers-reduced-motion:reduce){.rv-row.show,.rv-row.winner,.rv-row.winner .rv-trophy{animation:none;}}
 </style>
 </head>
 <body>
+<!-- Medal gradients (gold / silver / bronze), reused by every category -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="mdl-gold-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fdf0a8"/><stop offset=".5" stop-color="#e6bf55"/><stop offset="1" stop-color="#bf9230"/></linearGradient>
+    <linearGradient id="mdl-gold-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6bf"/><stop offset=".55" stop-color="#f5d974"/><stop offset="1" stop-color="#e2b643"/></linearGradient>
+    <linearGradient id="mdl-silver-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c4ccd6"/><stop offset="1" stop-color="#8e99a6"/></linearGradient>
+    <linearGradient id="mdl-silver-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e6ebf1"/><stop offset="1" stop-color="#b9c2cd"/></linearGradient>
+    <linearGradient id="mdl-bronze-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7cdb4"/><stop offset=".5" stop-color="#d0865f"/><stop offset="1" stop-color="#9c5832"/></linearGradient>
+    <linearGradient id="mdl-bronze-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbddc9"/><stop offset=".55" stop-color="#e7ab88"/><stop offset="1" stop-color="#c47c55"/></linearGradient>
+    <radialGradient id="mdl-shine" cx=".3" cy=".22" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
 <div class="wrap">
   <header>
     <div>
@@ -75,12 +134,27 @@
   <button class="add-cat" id="addCatBtn">+ Add category</button>
 
   <div class="overall">
-    <h2>Overall standing</h2>
+    <div class="overall-head">
+      <h2>Overall standing</h2>
+      <button class="reveal-btn" id="revealBtn" type="button">🏆 Reveal the winner</button>
+    </div>
     <div id="ranking"></div>
   </div>
 
   <footer>All Rights Reserved 2026</footer>
   <footer>Devs: Canopus, Yujin and Yyzu </footer>
+</div>
+
+<!-- Reveal the winner overlay -->
+<div class="reveal" id="reveal" hidden role="dialog" aria-modal="true" aria-label="Reveal the winner">
+  <div class="reveal-card">
+    <button class="reveal-close" id="revealClose" type="button" aria-label="Close">✕</button>
+    <div class="reveal-title">Overall standing</div>
+    <div class="reveal-caption" id="revealCaption"></div>
+    <div class="reveal-list" id="revealList"></div>
+    <div class="reveal-actions"><button class="reveal-replay" id="revealReplay" type="button">↻ Replay</button></div>
+  </div>
+  <canvas id="confetti"></canvas>
 </div>
 
 <script>
@@ -374,6 +448,38 @@ const saveInstituteName = debounce((id, name)=>{
   apiPost('update_institute_name', {id, name});
 });
 
+// ---- Medal icons: round metallic medal with a laurel wreath ----------
+function makeLaurel(color){
+  const R = 29;
+  const pt = (deg, r)=>{ const a = deg*Math.PI/180; return [50 + r*Math.cos(a), 50 + r*Math.sin(a)]; };
+  const f = n => n.toFixed(1);
+  const [sx, sy] = pt(114, R), [ex, ey] = pt(192, R);
+  let branch = `<path d="M${f(sx)} ${f(sy)} A${R} ${R} 0 0 1 ${f(ex)} ${f(ey)}" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round"/>`;
+  for(let k = 0; k < 7; k++){
+    const deg = 122 + k*10.5;
+    [[R + 3.2, -38], [R - 3.2, 38]].forEach(([r, off])=>{
+      const [cx, cy] = pt(deg, r);
+      branch += `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="4.6" ry="1.9" fill="${color}" transform="rotate(${f(deg - 90 + off)} ${f(cx)} ${f(cy)})"/>`;
+    });
+  }
+  return `<g>${branch}</g><g transform="translate(100 0) scale(-1 1)">${branch}</g>`;
+}
+const MEDALS = {
+  gold:   { rim:'mdl-gold-rim',   face:'mdl-gold-face',   edge:'#b8902c', laurel: makeLaurel('#c09a35') },
+  silver: { rim:'mdl-silver-rim', face:'mdl-silver-face', edge:'#8e99a6', laurel: makeLaurel('#9aa5b3') },
+  bronze: { rim:'mdl-bronze-rim', face:'mdl-bronze-face', edge:'#9c5832', laurel: makeLaurel('#b06f48') }
+};
+function medalSvg(kind, size=20){
+  const m = MEDALS[kind];
+  return `<svg class="medal-ico" width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="48" fill="url(#${m.rim})"/>
+    <circle cx="50" cy="50" r="43" fill="url(#${m.face})" stroke="${m.edge}" stroke-opacity=".45" stroke-width="1"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>
+    ${m.laurel}
+    <circle cx="50" cy="50" r="43" fill="url(#mdl-shine)"/>
+  </svg>`;
+}
+
 // Options for one medal dropdown. Every institute is always available,
 // even if it was already picked for another medal in the same event.
 function medalOptions(ev, medal){
@@ -491,9 +597,9 @@ function renderCategories(){
     head.innerHTML = `
       <div class="cat-title"><span class="chev">▾</span><span class="cat-dot"></span><input class="ev-name cat-name-input" style="font-weight:600;font-size:14.5px;" value="${escAttr(cat.name)}"></div>
       <div class="pts">
-        <span class="pt-pill g">G <input type="number" class="pt-input" data-k="gold" value="${cat.points.gold}"></span>
-        <span class="pt-pill s">S <input type="number" class="pt-input" data-k="silver" value="${cat.points.silver}"></span>
-        <span class="pt-pill b">B <input type="number" class="pt-input" data-k="bronze" value="${cat.points.bronze}"></span>
+        <span class="pt-pill g" title="Gold points">${medalSvg('gold',20)}<input type="number" class="pt-input" data-k="gold" value="${cat.points.gold}"></span>
+        <span class="pt-pill s" title="Silver points">${medalSvg('silver',20)}<input type="number" class="pt-input" data-k="silver" value="${cat.points.silver}"></span>
+        <span class="pt-pill b" title="Bronze points">${medalSvg('bronze',20)}<input type="number" class="pt-input" data-k="bronze" value="${cat.points.bronze}"></span>
       </div>
     `;
     head.querySelector('.chev').parentElement.addEventListener('click', (e)=>{
@@ -523,7 +629,10 @@ function renderCategories(){
 
     const headerRow = document.createElement('div');
     headerRow.className = 'row head';
-    headerRow.innerHTML = `<div>Event</div><div>Gold</div><div>Silver</div><div>Bronze</div><div></div>`;
+    headerRow.innerHTML = `<div>Event</div>
+      <div class="medal-head">${medalSvg('gold',22)}Gold</div>
+      <div class="medal-head">${medalSvg('silver',22)}Silver</div>
+      <div class="medal-head">${medalSvg('bronze',22)}Bronze</div><div></div>`;
     body.appendChild(headerRow);
 
     cat.events.forEach((ev, idx)=>{
@@ -548,6 +657,7 @@ function renderCategories(){
         const cell = document.createElement('div');
         cell.className = 'medal-cell';
         cell.dataset.label = medal[0].toUpperCase()+medal.slice(1);
+        cell.insertAdjacentHTML('beforeend', `<span class="cell-medal">${medalSvg(medal,22)}</span>`);
         const sel = medalSelect(ev, medal, cat.id);
         sel.addEventListener('change', e=>{
           ev.winners[medal] = e.target.value || null;
@@ -746,6 +856,141 @@ document.getElementById('reorderBtn').addEventListener('click', e=>{
   e.currentTarget.textContent = '⇅ Reorder: ' + (on ? 'On' : 'Off');
 });
 
+// ---- Reveal the winner ------------------------------------------------
+const revealEl = document.getElementById('reveal');
+const revealList = document.getElementById('revealList');
+const revealCaption = document.getElementById('revealCaption');
+const confettiCanvas = document.getElementById('confetti');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let revealTimers = [], confettiRaf = 0, revealRows = [];
+
+function later(fn, ms){ revealTimers.push(setTimeout(fn, ms)); }
+function stopReveal(){
+  revealTimers.forEach(clearTimeout);
+  revealTimers = [];
+  cancelAnimationFrame(confettiRaf);
+  confettiCanvas.getContext('2d').clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+}
+function countUp(el, to, ms=900){
+  if(reducedMotion || to === 0){ el.textContent = to; return; }
+  const t0 = performance.now();
+  (function f(now){
+    const p = Math.min(1, (now - t0) / ms);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if(p < 1) requestAnimationFrame(f);
+  })(t0);
+}
+function launchConfetti(){
+  if(reducedMotion) return;
+  const ctx = confettiCanvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = window.innerWidth, H = window.innerHeight;
+  confettiCanvas.width = W * dpr; confettiCanvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ['#f5d974','#e2b643','#6ee7d8','#ff7a90','#8ab4ff','#ffffff'];
+  const parts = Array.from({length:150}, ()=>({
+    x: W/2 + (Math.random() - .5) * 140, y: H * .42,
+    vx: (Math.random() - .5) * 15, vy: -(Math.random() * 13 + 5),
+    g: .35 + Math.random() * .15, w: 6 + Math.random() * 6, h: 4 + Math.random() * 5,
+    rot: Math.random() * 6.28, vr: (Math.random() - .5) * .3,
+    c: colors[Math.floor(Math.random() * colors.length)]
+  }));
+  let frame = 0;
+  cancelAnimationFrame(confettiRaf);
+  (function step(){
+    ctx.clearRect(0, 0, W, H);
+    let alive = 0;
+    parts.forEach(p=>{
+      p.vy += p.g; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if(p.y < H + 30){
+        alive++;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      }
+    });
+    if(alive > 0 && frame++ < 420) confettiRaf = requestAnimationFrame(step);
+    else ctx.clearRect(0, 0, W, H);
+  })();
+}
+
+function rankBadge(i){
+  return i < 3 ? medalSvg(['gold','silver','bronze'][i], 36) : `<span class="rv-num">${i+1}</span>`;
+}
+function buildRevealList(rows){
+  revealList.innerHTML = rows.map((r, i)=>{
+    const img = r.inst.image;
+    const initial = escHtml((r.inst.name.trim()[0] || '?').toUpperCase());
+    return `<div class="rv-row">
+      <div class="rv-rank">${rankBadge(i)}</div>
+      <div class="rv-main">
+        <div class="rank-avatar ${img ? 'has-img' : ''}" style="--c:${r.inst.color};${img ? `background-image:url('${escAttr(img)}')` : ''}">${img ? '' : initial}</div>
+        <div class="rv-name rank-name" style="--c:${r.inst.color}">${escHtml(r.inst.name)}</div>
+        <span class="rv-trophy">🏆</span>
+      </div>
+      <div class="rv-score">0</div>
+    </div>`;
+  }).join('');
+}
+
+function playReveal(){
+  stopReveal();
+  buildRevealList(revealRows);
+  const els = [...revealList.children];
+  const n = els.length;
+  const max = revealRows[0].score;
+  const step = reducedMotion ? 250 : 1000;
+  const pause = reducedMotion ? 300 : 1700;
+  revealCaption.textContent = n > 1 ? 'Drumroll…' : '';
+
+  function revealRow(i){
+    els[i].classList.add('show');
+    countUp(els[i].querySelector('.rv-score'), revealRows[i].score);
+    if(i !== 0) return;
+    // finale: highlight everyone on the top score
+    revealRows.forEach((r, k)=>{ if(r.score === max) els[k].classList.add('winner'); });
+    const names = revealRows.filter(r=> r.score === max).map(r=> r.inst.name);
+    revealCaption.textContent = names.length === 1 ? `🏆 ${names[0]} wins!` : `🤝 It's a tie: ${names.join(' & ')}`;
+    launchConfetti();
+  }
+
+  let t = 700;
+  for(let i = n - 1; i >= 0; i--){
+    if(i === 0 && n > 1){
+      later(()=>{ revealCaption.textContent = 'And the winner is…'; }, t);
+      t += pause;
+    }
+    const idx = i;
+    later(()=> revealRow(idx), t);
+    t += step;
+  }
+}
+
+function openReveal(){
+  const rows = state.institutes
+    .map(inst=>({inst, score: instituteScore(inst.id)}))
+    .sort((a, b)=> b.score - a.score);
+  if(!rows.length) return;
+  if(rows[0].score <= 0){
+    alert('No medals have been assigned yet. Pick some winners first, then reveal.');
+    return;
+  }
+  revealRows = rows;
+  revealEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  playReveal();
+}
+function closeReveal(){
+  stopReveal();
+  revealEl.hidden = true;
+  document.body.style.overflow = '';
+}
+document.getElementById('revealBtn').addEventListener('click', openReveal);
+document.getElementById('revealClose').addEventListener('click', closeReveal);
+document.getElementById('revealReplay').addEventListener('click', playReveal);
+revealEl.addEventListener('click', e=>{ if(e.target === revealEl) closeReveal(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !revealEl.hidden) closeReveal(); });
+
 // ---- Light / dark theme --------------------------------------------
 const THEME_KEY = "intramurals-theme";
 const systemLight = window.matchMedia("(prefers-color-scheme: light)");
@@ -773,4 +1018,7 @@ updateThemeBtn();
 })();
 </script>
 </body>
+
+
 </html>
+
