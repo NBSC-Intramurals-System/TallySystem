@@ -181,6 +181,10 @@ $out = mutate($DB, function (&$db) use ($action, $body, $DEFAULT) {
       ];
       return ['ok' => true, 'id' => $newId];
 
+    case 'remove_category':
+      $db['categories'] = array_values(array_filter($db['categories'], fn($c) => (string)$c['id'] !== $id));
+      return ['ok' => true];
+
     case 'reset':
       $fresh = json_decode(@file_get_contents($DEFAULT), true);
       if (is_array($fresh)) $db = $fresh;
