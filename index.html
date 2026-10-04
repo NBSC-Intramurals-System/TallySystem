@@ -32,6 +32,51 @@
   .inst-name[readonly]{border-bottom-color:transparent;cursor:default;}
   .inst-save{margin-left:auto;height:26px;border:0;border-radius:13px;background:var(--c);color:#fff;cursor:pointer;font-size:12px;font-weight:600;line-height:26px;padding:0 14px;}
   .inst-save:disabled{opacity:.75;cursor:default;}
+  /* Reveal the winner */
+  .reveal-wrap[hidden],#ranking[hidden]{display:none !important;}
+  .reveal-wrap{display:flex;justify-content:center;align-items:center;padding:18px 0 8px;}
+  .reveal-btn{border:0;border-radius:999px;padding:13px 30px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
+    background:var(--gold-fill);color:#3a2a05;box-shadow:0 4px 16px rgba(232,182,76,.35);transition:transform .15s ease, box-shadow .15s ease;}
+  .reveal-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(232,182,76,.45);}
+  .reveal-btn:active{transform:translateY(0);}
+  #ranking.reveal-in{animation:revealIn .5s ease both;}
+  /* Settings modal */
+  .set-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,9,18,.6);backdrop-filter:blur(3px);}
+  .set-overlay[hidden]{display:none !important;}
+  .set-modal{width:100%;max-width:520px;max-height:min(85vh,720px);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;animation:revealIn .25s ease both;}
+  .set-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:var(--panel-2);}
+  .set-head h3{margin:0;font-size:15px;font-weight:700;}
+  .set-x{width:28px;height:28px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;font-size:13px;line-height:1;}
+  .set-x:hover{background:#d9534f;color:#fff;}
+  .set-body{padding:18px 20px 20px;overflow-y:auto;}
+  .set-label{margin:0 0 10px;font-size:11.5px;color:var(--ink-dim);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
+  .set-list{margin-bottom:22px;}
+  .set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);}
+  .set-name{font-weight:600;font-size:14px;overflow-wrap:anywhere;}
+  .set-meta{margin-top:2px;font-size:11.5px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;}
+  .set-del{flex-shrink:0;border:1px solid var(--line);background:none;color:var(--ink-dim);border-radius:9px;padding:6px 12px;font-size:12px;cursor:pointer;transition:border-color .15s ease,color .15s ease;}
+  .set-del:hover{border-color:#e0625a;color:#e0625a;}
+  .set-empty{padding:14px;text-align:center;color:var(--ink-dim);font-size:13px;border:1px dashed var(--line);border-radius:12px;}
+  .set-form{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);}
+  .set-form input[type=text],.set-form input[type=number]{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:13.5px;font-family:inherit;}
+  .set-form input:focus{outline:none;border-color:var(--accent);}
+  .set-pts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .set-pts label{display:grid;gap:4px;font-size:11.5px;color:var(--ink-dim);}
+  .set-add{border:0;border-radius:10px;padding:10px 14px;font-size:13.5px;font-weight:700;cursor:pointer;background:var(--accent);color:#06312c;font-family:inherit;}
+  .set-add:hover{filter:brightness(1.08);}
+  /* Close button */
+  .overall-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:13px;z-index:6;transition:background .15s ease, color .15s ease;}
+  .overall-close:hover{background:#d9534f;color:#fff;}
+  .overall-close[hidden]{display:none !important;}
+  /* Celebration */
+  .overall{position:relative;}
+  #confetti{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;}
+  .rank.winner{border-radius:12px;padding-left:10px;padding-right:10px;margin:0 -10px;background:linear-gradient(90deg,rgba(232,182,76,.18),transparent);animation:winnerGlow 1.6s ease-in-out 3;}
+  .rank.winner .rank-name::after{content:"👑";margin-left:8px;display:inline-block;animation:crownBounce 1s ease-in-out 4;}
+  @keyframes winnerGlow{0%,100%{box-shadow:0 0 0 rgba(232,182,76,0);}50%{box-shadow:0 0 22px rgba(232,182,76,.55);}}
+  @keyframes crownBounce{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-4px) rotate(-10deg);}}
+  @media (prefers-reduced-motion: reduce){.rank.winner,.rank.winner .rank-name::after{animation:none;}}
+  @keyframes revealIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
 </style>
 </head>
 <body>
@@ -42,6 +87,7 @@
       <div class="sub">Assign medals per event — totals calculate automatically.</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <button class="reset-btn theme-btn" id="settingsBtn" type="button">⚙ Settings</button>
       <button class="reset-btn theme-btn" id="themeBtn" type="button"></button>
       <button class="reset-btn" id="exportCsvBtn">Export CSV</button>
       <button class="reset-btn" id="resetBtn">Reset all</button>
@@ -54,12 +100,41 @@
   <button class="add-cat" id="addCatBtn">+ Add category</button>
 
   <div class="overall">
+    <button class="overall-close" id="closeRankBtn" type="button" title="Close" aria-label="Close standing" hidden>✕</button>
     <h2>Overall standing</h2>
-    <div id="ranking"></div>
+    <div class="reveal-wrap" id="revealWrap">
+      <button class="reveal-btn" id="revealBtn" type="button">🏆 Reveal the winner</button>
+    </div>
+    <div id="ranking" hidden></div>
+    <canvas id="confetti"></canvas>
   </div>
 
   <footer>All Rights Reserved 2026</footer>
   <footer>Devs: Canopus, Yujin and Yyzu </footer>
+</div>
+
+<div class="set-overlay" id="settingsOverlay" hidden>
+  <div class="set-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="set-head">
+      <h3 id="settingsTitle">Settings</h3>
+      <button class="set-x" id="settingsClose" type="button" aria-label="Close settings">✕</button>
+    </div>
+    <div class="set-body">
+      <div class="set-label">Manage categories</div>
+      <div class="set-list" id="setCatList"></div>
+
+      <div class="set-label">Add a category</div>
+      <div class="set-form">
+        <input type="text" id="newCatName" placeholder="Category name" maxlength="80" autocomplete="off">
+        <div class="set-pts">
+          <label>Gold pts <input type="number" id="newCatGold" value="10"></label>
+          <label>Silver pts <input type="number" id="newCatSilver" value="7"></label>
+          <label>Bronze pts <input type="number" id="newCatBronze" value="5"></label>
+        </div>
+        <button class="set-add" id="newCatAdd" type="button">+ Add category</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -492,13 +567,95 @@ function updateCatTotals(catEl, cat){
   totalsRow.innerHTML = html;
 }
 
+let revealed = false;   // overall standing stays hidden until "Reveal the winner" is clicked
+function setReveal(on){
+  revealed = on;
+  document.getElementById('revealWrap').hidden = on;
+  document.getElementById('closeRankBtn').hidden = !on;
+  if(!on && confettiRaf){
+    cancelAnimationFrame(confettiRaf); confettiRaf = null;
+    const c = document.getElementById('confetti');
+    c.getContext('2d').clearRect(0, 0, c.width, c.height);
+  }
+  const ranking = document.getElementById('ranking');
+  ranking.hidden = !on;
+  ranking.classList.remove('reveal-in');
+  renderRanking();
+  if(on){ void ranking.offsetWidth; ranking.classList.add('reveal-in'); }
+}
+document.getElementById('closeRankBtn').addEventListener('click', ()=> setReveal(false));
+document.getElementById('revealBtn').addEventListener('click', ()=>{
+  setReveal(true);
+  startConfetti();
+});
+
+// ---- Celebration: confetti burst inside the Overall standing panel ----
+let confettiRaf = null;
+function startConfetti(){
+  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const canvas = document.getElementById('confetti');
+  const box = canvas.parentElement.getBoundingClientRect();
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = box.width * dpr;
+  canvas.height = box.height * dpr;
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+  const W = box.width, H = box.height;
+  const colors = ['#e8b64c','#4f9ddb','#5fae72','#e06c9f','#b479c9','#3fb8af','#d97757','#ffffff'];
+  const parts = [];
+  const burst = (x, y, n, angleMin, angleMax)=>{
+    for(let i=0;i<n;i++){
+      const a = (angleMin + Math.random()*(angleMax-angleMin)) * Math.PI/180;
+      const sp = 7 + Math.random()*9;
+      parts.push({
+        x, y, vx:Math.cos(a)*sp, vy:-Math.sin(a)*sp,
+        w:6+Math.random()*6, h:4+Math.random()*5,
+        rot:Math.random()*Math.PI*2, vr:(Math.random()-.5)*.4,
+        color:colors[(Math.random()*colors.length)|0],
+        life:0, max:140 + Math.random()*60
+      });
+    }
+  };
+  // cannons from both bottom corners + a center pop
+  burst(0, H, 60, 40, 80);
+  burst(W, H, 60, 100, 140);
+  burst(W/2, H*0.35, 50, 60, 120);
+  // second wave
+  setTimeout(()=>{ burst(0, H, 40, 45, 80); burst(W, H, 40, 100, 135); }, 600);
+
+  const endBy = performance.now() + 900;
+  if(confettiRaf) cancelAnimationFrame(confettiRaf);
+  (function frame(){
+    ctx.clearRect(0,0,W,H);
+    for(let i=parts.length-1;i>=0;i--){
+      const p = parts[i];
+      p.vy += 0.22; p.vx *= 0.99; p.vy *= 0.99;
+      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
+      const alpha = Math.max(0, 1 - Math.max(0, p.life - p.max*0.7) / (p.max*0.3));
+      if(p.life > p.max || p.y > H + 20){ parts.splice(i,1); continue; }
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+      ctx.fillStyle = p.color;
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+      ctx.restore();
+    }
+    if(parts.length || performance.now() < endBy){
+      confettiRaf = requestAnimationFrame(frame);
+    }else{
+      ctx.clearRect(0,0,W,H); confettiRaf = null;
+    }
+  })();
+}
+
 function renderRanking(){
   saveLocal();
+  if(!revealed) return;
   const ranking = document.getElementById('ranking');
   const rows = state.institutes.map(inst=>({inst, score: instituteScore(inst.id)}));
   rows.sort((a,b)=> b.score - a.score);
   ranking.innerHTML = rows.map((r,i)=>`
-    <div class="rank">
+    <div class="rank ${i===0 && r.score>0 ? 'winner' : ''}">
       <div class="rank-left">
         <div class="rank-num ${i===0 && r.score>0 ? 'first':''}">${i+1}</div>
         <div class="rank-avatar ${r.inst.image ? 'has-img' : ''}" style="--c:${r.inst.color};${r.inst.image ? `background-image:url('${escAttr(r.inst.image)}')` : ''}">${r.inst.image ? '' : escHtml((r.inst.name.trim()[0] || '?').toUpperCase())}</div>
@@ -583,16 +740,77 @@ document.getElementById('addInstBtn').addEventListener('click', async ()=>{
   }
 });
 
-document.getElementById('addCatBtn').addEventListener('click', async ()=>{
-  const res = await apiPost('add_category', {name:'New category', gold:10, silver:7, bronze:5});
+async function addCategory(name, gold=10, silver=7, bronze=5){
+  const res = await apiPost('add_category', {name, gold, silver, bronze});
   const newId = res && res.id ? res.id : uid('c');
   state.categories.push({
-    id:newId, name:'New category', collapsed:false,
-    points:{gold:10,silver:7,bronze:5},
+    id:newId, name, collapsed:false,
+    points:{gold, silver, bronze},
     events:[]
   });
   render();
-});
+  renderSettings();
+}
+async function removeCategory(id){
+  const cat = state.categories.find(c=>c.id===id);
+  if(!cat) return;
+  const n = cat.events.length;
+  const msg = n
+    ? `Delete "${cat.name}" and its ${n} event${n===1?'':'s'}? Their medals and points will be removed from the standings. This cannot be undone.`
+    : `Delete "${cat.name}"?`;
+  if(!confirm(msg)) return;
+  state.categories = state.categories.filter(c=>c.id!==id);
+  render();
+  renderSettings();
+  apiPost('remove_category', {id});
+}
+
+document.getElementById('addCatBtn').addEventListener('click', ()=> addCategory('New category'));
+
+// ---- Settings: manage categories -----------------------------------
+const settingsOverlay = document.getElementById('settingsOverlay');
+function renderSettings(){
+  const list = document.getElementById('setCatList');
+  if(!state.categories.length){
+    list.innerHTML = '<div class="set-empty">No categories yet. Add one below.</div>';
+    return;
+  }
+  list.innerHTML = state.categories.map(c=>{
+    const n = c.events.length;
+    return `<div class="set-row">
+      <div>
+        <div class="set-name">${escHtml(c.name || 'Untitled')}</div>
+        <div class="set-meta">${n} event${n===1?'':'s'} · G ${escHtml(c.points.gold)} / S ${escHtml(c.points.silver)} / B ${escHtml(c.points.bronze)}</div>
+      </div>
+      <button class="set-del" type="button" data-cat="${escAttr(c.id)}">Delete</button>
+    </div>`;
+  }).join('');
+  list.querySelectorAll('.set-del').forEach(btn=>{
+    btn.addEventListener('click', ()=> removeCategory(btn.dataset.cat));
+  });
+}
+function openSettings(){
+  renderSettings();
+  settingsOverlay.hidden = false;
+  document.getElementById('newCatName').focus();
+}
+function closeSettings(){ settingsOverlay.hidden = true; }
+document.getElementById('settingsBtn').addEventListener('click', openSettings);
+document.getElementById('settingsClose').addEventListener('click', closeSettings);
+settingsOverlay.addEventListener('click', e=>{ if(e.target === settingsOverlay) closeSettings(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !settingsOverlay.hidden) closeSettings(); });
+
+async function submitNewCategory(){
+  const nameInp = document.getElementById('newCatName');
+  const name = nameInp.value.trim();
+  if(!name){ nameInp.focus(); return; }
+  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
+  await addCategory(name, num('newCatGold'), num('newCatSilver'), num('newCatBronze'));
+  nameInp.value = '';
+  nameInp.focus();
+}
+document.getElementById('newCatAdd').addEventListener('click', submitNewCategory);
+document.getElementById('newCatName').addEventListener('keydown', e=>{ if(e.key === 'Enter') submitNewCategory(); });
 
 document.getElementById('resetBtn').addEventListener('click', async ()=>{
   if(!confirm('Reset all data to the default blank tally sheet? This cannot be undone.')) return;
@@ -603,6 +821,7 @@ document.getElementById('resetBtn').addEventListener('click', async ()=>{
     state = defaultState();
   }
   render();
+  setReveal(false);
 });
 
 // ---- Light / dark theme --------------------------------------------
