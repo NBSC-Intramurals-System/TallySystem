@@ -32,54 +32,83 @@
   .inst-name[readonly]{border-bottom-color:transparent;cursor:default;}
   .inst-save{margin-left:auto;height:26px;border:0;border-radius:13px;background:var(--c);color:#fff;cursor:pointer;font-size:12px;font-weight:600;line-height:26px;padding:0 14px;}
   .inst-save:disabled{opacity:.75;cursor:default;}
+
+  .row-actions{display:flex;align-items:center;justify-content:flex-end;gap:2px;}
+
+  /* Medal icons (gold / silver / bronze) */
+  .medal-ico{display:block;flex-shrink:0;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.35));}
+  .pt-pill{display:inline-flex;align-items:center;gap:5px;}
+  .medal-head{display:flex;align-items:center;gap:6px;}
+  .cell-medal{display:none;}
+  @media (max-width:640px){
+    .row .medal-cell{display:flex;align-items:center;gap:8px;}
+    .row .medal-cell::before{display:none;}
+    .cell-medal{display:inline-flex;}
+    .row .medal-cell select.medal{flex:1;min-width:0;}
+  }
+
+  /* Drag & drop reordering */
+  .ev-cell{display:flex;align-items:center;gap:4px;min-width:0;}
+  .ev-cell .ev-name{flex:1;min-width:0;}
+  .drag-grip{flex-shrink:0;width:22px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--ink-dim);font-size:15px;line-height:1;letter-spacing:-2px;cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;}
+  .drag-grip:hover{color:var(--accent);background:var(--panel-2);}
+  .row.shiftable{transition:transform .15s ease;}
+  .row.dragging{position:relative;z-index:20;background:var(--panel-2);box-shadow:0 10px 28px rgba(0,0,0,.35);outline:1px solid var(--accent);transition:none;cursor:grabbing;will-change:transform;}
+  body.is-dragging{user-select:none;-webkit-user-select:none;cursor:grabbing;}
+  /* Wider medal dropdowns so full institute names fit (desktop/tablet) */
+  @media (min-width:641px){
+    .row,.cat-totals{grid-template-columns:1fr repeat(3,minmax(0,260px)) 30px;}
+  }
   /* Reveal the winner */
-  .reveal-wrap[hidden],#ranking[hidden]{display:none !important;}
-  .reveal-wrap{display:flex;justify-content:center;align-items:center;padding:18px 0 8px;}
-  .reveal-btn{border:0;border-radius:999px;padding:13px 30px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;
-    background:var(--gold-fill);color:#3a2a05;box-shadow:0 4px 16px rgba(232,182,76,.35);transition:transform .15s ease, box-shadow .15s ease;}
-  .reveal-btn:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(232,182,76,.45);}
-  .reveal-btn:active{transform:translateY(0);}
-  #ranking.reveal-in{animation:revealIn .5s ease both;}
-  /* Settings modal */
-  .set-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(5,9,18,.6);backdrop-filter:blur(3px);}
-  .set-overlay[hidden]{display:none !important;}
-  .set-modal{width:100%;max-width:520px;max-height:min(85vh,720px);display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:0 24px 60px rgba(0,0,0,.45);overflow:hidden;animation:revealIn .25s ease both;}
-  .set-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--line);background:var(--panel-2);}
-  .set-head h3{margin:0;font-size:15px;font-weight:700;}
-  .set-x{width:28px;height:28px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;font-size:13px;line-height:1;}
-  .set-x:hover{background:#d9534f;color:#fff;}
-  .set-body{padding:18px 20px 20px;overflow-y:auto;}
-  .set-label{margin:0 0 10px;font-size:11.5px;color:var(--ink-dim);font-weight:600;text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;}
-  .set-list{margin-bottom:22px;}
-  .set-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);}
-  .set-name{font-weight:600;font-size:14px;overflow-wrap:anywhere;}
-  .set-meta{margin-top:2px;font-size:11.5px;color:var(--ink-dim);font-family:'JetBrains Mono',monospace;}
-  .set-del{flex-shrink:0;border:1px solid var(--line);background:none;color:var(--ink-dim);border-radius:9px;padding:6px 12px;font-size:12px;cursor:pointer;transition:border-color .15s ease,color .15s ease;}
-  .set-del:hover{border-color:#e0625a;color:#e0625a;}
-  .set-empty{padding:14px;text-align:center;color:var(--ink-dim);font-size:13px;border:1px dashed var(--line);border-radius:12px;}
-  .set-form{display:grid;gap:10px;padding:14px;border:1px solid var(--line);border-radius:12px;background:var(--panel-2);}
-  .set-form input[type=text],.set-form input[type=number]{width:100%;box-sizing:border-box;padding:9px 11px;border:1px solid var(--line);border-radius:9px;background:var(--bg);color:var(--ink);font-size:13.5px;font-family:inherit;}
-  .set-form input:focus{outline:none;border-color:var(--accent);}
-  .set-pts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
-  .set-pts label{display:grid;gap:4px;font-size:11.5px;color:var(--ink-dim);}
-  .set-add{border:0;border-radius:10px;padding:10px 14px;font-size:13.5px;font-weight:700;cursor:pointer;background:var(--accent);color:#06312c;font-family:inherit;}
-  .set-add:hover{filter:brightness(1.08);}
-  /* Close button */
-  .overall-close{position:absolute;top:14px;right:14px;width:28px;height:28px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;line-height:1;font-size:13px;z-index:6;transition:background .15s ease, color .15s ease;}
-  .overall-close:hover{background:#d9534f;color:#fff;}
-  .overall-close[hidden]{display:none !important;}
-  /* Celebration */
-  .overall{position:relative;}
-  #confetti{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;}
-  .rank.winner{border-radius:12px;padding-left:10px;padding-right:10px;margin:0 -10px;background:linear-gradient(90deg,rgba(232,182,76,.18),transparent);animation:winnerGlow 1.6s ease-in-out 3;}
-  .rank.winner .rank-name::after{content:"👑";margin-left:8px;display:inline-block;animation:crownBounce 1s ease-in-out 4;}
-  @keyframes winnerGlow{0%,100%{box-shadow:0 0 0 rgba(232,182,76,0);}50%{box-shadow:0 0 22px rgba(232,182,76,.55);}}
-  @keyframes crownBounce{0%,100%{transform:translateY(0) rotate(0);}50%{transform:translateY(-4px) rotate(-10deg);}}
-  @media (prefers-reduced-motion: reduce){.rank.winner,.rank.winner .rank-name::after{animation:none;}}
-  @keyframes revealIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:none;}}
+  .reveal-center{display:flex;justify-content:center;align-items:center;margin:28px 0 8px;}
+  .reveal-center .reveal-btn{padding:14px 30px;font-size:15px;border-radius:12px;}
+  .reveal-btn{border:0;border-radius:10px;padding:9px 15px;font-size:12.5px;font-weight:700;font-family:inherit;cursor:pointer;background:linear-gradient(135deg,#f9e08a,#e2b643);color:#3a2a05;box-shadow:0 2px 10px rgba(232,182,76,.35);transition:transform .15s ease,box-shadow .15s ease;}
+  .reveal-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(232,182,76,.5);}
+  .reveal-btn:active{transform:none;}
+
+  .reveal{position:fixed;inset:0;z-index:100;display:flex;padding:calc(18px + env(safe-area-inset-top,0px)) 14px calc(18px + env(safe-area-inset-bottom,0px));background:rgba(5,8,16,.84);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);overflow-y:auto;}
+  .reveal[hidden]{display:none;}
+  .reveal-card{position:relative;z-index:1;margin:auto;width:min(560px,100%);background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:22px 20px 18px;box-shadow:var(--shadow-card),0 20px 60px rgba(0,0,0,.45);}
+  .reveal-close{position:absolute;top:12px;right:12px;width:30px;height:30px;border:0;border-radius:50%;background:rgba(128,128,128,.18);color:inherit;cursor:pointer;font-size:13px;line-height:1;}
+  .reveal-close:hover{background:#d9534f;color:#fff;}
+  .reveal-title{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-dim);font-weight:600;margin:0 40px 6px 2px;}
+  .reveal-caption{min-height:30px;font-size:20px;font-weight:700;margin:0 2px 14px;letter-spacing:-.01em;}
+  .reveal-actions{display:flex;justify-content:center;margin-top:6px;}
+  .reveal-replay{background:none;border:1px solid var(--line);color:var(--ink-dim);border-radius:9px;padding:7px 14px;font-size:12px;cursor:pointer;font-family:inherit;}
+  .reveal-replay:hover{border-color:var(--accent);color:var(--ink);}
+  #confetti{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:2;}
+
+  .rv-row{display:flex;align-items:center;gap:12px;padding:12px 14px;margin-bottom:10px;border:1px dashed var(--line);border-radius:14px;background:var(--panel-2);opacity:.4;}
+  .rv-row.show{opacity:1;border-style:solid;animation:rvIn .7s cubic-bezier(.22,1,.36,1);}
+  .rv-row:not(.show) .rv-main,.rv-row:not(.show) .rv-score{visibility:hidden;}
+  .rv-rank{width:40px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .rv-num{width:30px;height:30px;border-radius:10px;display:flex;align-items:center;justify-content:center;font:700 13px 'JetBrains Mono',monospace;background:var(--bg);border:1px solid var(--line);color:var(--ink-dim);}
+  .rv-main{display:flex;align-items:center;gap:12px;flex:1;min-width:0;}
+  .rv-main .rank-avatar{width:44px;height:44px;font-size:18px;border-radius:12px;}
+  .rv-name{font-size:15px;min-width:0;overflow-wrap:anywhere;}
+  .rv-score{font:700 22px 'JetBrains Mono',monospace;font-variant-numeric:tabular-nums;}
+  .rv-trophy{display:none;font-size:20px;}
+  .rv-row.winner{background:linear-gradient(135deg,rgba(232,182,76,.24),var(--panel-2));border-color:var(--gold-fill);box-shadow:0 0 0 1px var(--gold-fill),0 0 34px rgba(232,182,76,.38);animation:rvGlow 1.8s ease-in-out infinite alternate;}
+  .rv-row.winner .rv-trophy{display:inline;animation:rvPop .7s cubic-bezier(.22,1,.36,1);}
+  @keyframes rvIn{0%{opacity:0;transform:translateY(28px) scale(.94);}60%{opacity:1;transform:translateY(-4px) scale(1.02);}100%{opacity:1;transform:none;}}
+  @keyframes rvGlow{from{box-shadow:0 0 0 1px var(--gold-fill),0 0 18px rgba(232,182,76,.25);}to{box-shadow:0 0 0 1px var(--gold-fill),0 0 38px rgba(232,182,76,.55);}}
+  @keyframes rvPop{0%{transform:scale(0) rotate(-30deg);}70%{transform:scale(1.3) rotate(8deg);}100%{transform:scale(1) rotate(0);}}
+  @media (prefers-reduced-motion:reduce){.rv-row.show,.rv-row.winner,.rv-row.winner .rv-trophy{animation:none;}}
 </style>
 </head>
 <body>
+<!-- Medal gradients (gold / silver / bronze), reused by every category -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <linearGradient id="mdl-gold-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fdf0a8"/><stop offset=".5" stop-color="#e6bf55"/><stop offset="1" stop-color="#bf9230"/></linearGradient>
+    <linearGradient id="mdl-gold-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff6bf"/><stop offset=".55" stop-color="#f5d974"/><stop offset="1" stop-color="#e2b643"/></linearGradient>
+    <linearGradient id="mdl-silver-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".5" stop-color="#c4ccd6"/><stop offset="1" stop-color="#8e99a6"/></linearGradient>
+    <linearGradient id="mdl-silver-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset=".55" stop-color="#e6ebf1"/><stop offset="1" stop-color="#b9c2cd"/></linearGradient>
+    <linearGradient id="mdl-bronze-rim" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f7cdb4"/><stop offset=".5" stop-color="#d0865f"/><stop offset="1" stop-color="#9c5832"/></linearGradient>
+    <linearGradient id="mdl-bronze-face" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbddc9"/><stop offset=".55" stop-color="#e7ab88"/><stop offset="1" stop-color="#c47c55"/></linearGradient>
+    <radialGradient id="mdl-shine" cx=".3" cy=".22" r=".75"><stop offset="0" stop-color="#fff" stop-opacity=".55"/><stop offset=".6" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+</svg>
 <div class="wrap">
   <header>
     <div>
@@ -87,7 +116,6 @@
       <div class="sub">Assign medals per event — totals calculate automatically.</div>
     </div>
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
-      <button class="reset-btn theme-btn" id="settingsBtn" type="button">⚙ Settings</button>
       <button class="reset-btn theme-btn" id="themeBtn" type="button"></button>
       <button class="reset-btn" id="exportCsvBtn">Export CSV</button>
       <button class="reset-btn" id="resetBtn">Reset all</button>
@@ -99,42 +127,24 @@
   <div id="categories"></div>
   <button class="add-cat" id="addCatBtn">+ Add category</button>
 
-  <div class="overall">
-    <button class="overall-close" id="closeRankBtn" type="button" title="Close" aria-label="Close standing" hidden>✕</button>
-    <h2>Overall standing</h2>
-    <div class="reveal-wrap" id="revealWrap">
-      <button class="reveal-btn" id="revealBtn" type="button">🏆 Reveal the winner</button>
-    </div>
-    <div id="ranking" hidden></div>
-    <canvas id="confetti"></canvas>
+  <div class="reveal-center">
+    <button class="reveal-btn" id="revealBtn" type="button">🏆 Reveal the winner</button>
   </div>
 
   <footer>All Rights Reserved 2026</footer>
   <footer>Devs: Canopus, Yujin and Yyzu </footer>
 </div>
 
-<div class="set-overlay" id="settingsOverlay" hidden>
-  <div class="set-modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-    <div class="set-head">
-      <h3 id="settingsTitle">Settings</h3>
-      <button class="set-x" id="settingsClose" type="button" aria-label="Close settings">✕</button>
-    </div>
-    <div class="set-body">
-      <div class="set-label">Manage categories</div>
-      <div class="set-list" id="setCatList"></div>
-
-      <div class="set-label">Add a category</div>
-      <div class="set-form">
-        <input type="text" id="newCatName" placeholder="Category name" maxlength="80" autocomplete="off">
-        <div class="set-pts">
-          <label>Gold pts <input type="number" id="newCatGold" value="10"></label>
-          <label>Silver pts <input type="number" id="newCatSilver" value="7"></label>
-          <label>Bronze pts <input type="number" id="newCatBronze" value="5"></label>
-        </div>
-        <button class="set-add" id="newCatAdd" type="button">+ Add category</button>
-      </div>
-    </div>
+<!-- Reveal the winner overlay -->
+<div class="reveal" id="reveal" hidden role="dialog" aria-modal="true" aria-label="Reveal the winner">
+  <div class="reveal-card">
+    <button class="reveal-close" id="revealClose" type="button" aria-label="Close">✕</button>
+    <div class="reveal-title">Overall standing</div>
+    <div class="reveal-caption" id="revealCaption"></div>
+    <div class="reveal-list" id="revealList"></div>
+    <div class="reveal-actions"><button class="reveal-replay" id="revealReplay" type="button">↻ Replay</button></div>
   </div>
+  <canvas id="confetti"></canvas>
 </div>
 
 <script>
@@ -194,7 +204,7 @@ function defaultState(){
           "Chess Men (Individual)","Chess Women (Individual)",
           "Chess Men (Institute)","Chess Women (Institute)",
           "Mobile Legends Men (E-Sports)","Mobile Legends Women (E-Sports)",
-          "Tekken Mixed (E-Sports)",
+          "Tekken Men (E-Sports)","Tekken Women (E-Sports)",
           "Pickleball Men","Pickleball Women","Pickleball Mixed",
           "Sepaktakraw Men","Sepaktakraw Women",
           "Table Tennis (Single Men)","Table Tennis (Single Women)",
@@ -428,6 +438,38 @@ const saveInstituteName = debounce((id, name)=>{
   apiPost('update_institute_name', {id, name});
 });
 
+// ---- Medal icons: round metallic medal with a laurel wreath ----------
+function makeLaurel(color){
+  const R = 29;
+  const pt = (deg, r)=>{ const a = deg*Math.PI/180; return [50 + r*Math.cos(a), 50 + r*Math.sin(a)]; };
+  const f = n => n.toFixed(1);
+  const [sx, sy] = pt(114, R), [ex, ey] = pt(192, R);
+  let branch = `<path d="M${f(sx)} ${f(sy)} A${R} ${R} 0 0 1 ${f(ex)} ${f(ey)}" fill="none" stroke="${color}" stroke-width="1.4" stroke-linecap="round"/>`;
+  for(let k = 0; k < 7; k++){
+    const deg = 122 + k*10.5;
+    [[R + 3.2, -38], [R - 3.2, 38]].forEach(([r, off])=>{
+      const [cx, cy] = pt(deg, r);
+      branch += `<ellipse cx="${f(cx)}" cy="${f(cy)}" rx="4.6" ry="1.9" fill="${color}" transform="rotate(${f(deg - 90 + off)} ${f(cx)} ${f(cy)})"/>`;
+    });
+  }
+  return `<g>${branch}</g><g transform="translate(100 0) scale(-1 1)">${branch}</g>`;
+}
+const MEDALS = {
+  gold:   { rim:'mdl-gold-rim',   face:'mdl-gold-face',   edge:'#b8902c', laurel: makeLaurel('#c09a35') },
+  silver: { rim:'mdl-silver-rim', face:'mdl-silver-face', edge:'#8e99a6', laurel: makeLaurel('#9aa5b3') },
+  bronze: { rim:'mdl-bronze-rim', face:'mdl-bronze-face', edge:'#9c5832', laurel: makeLaurel('#b06f48') }
+};
+function medalSvg(kind, size=20){
+  const m = MEDALS[kind];
+  return `<svg class="medal-ico" width="${size}" height="${size}" viewBox="0 0 100 100" aria-hidden="true">
+    <circle cx="50" cy="50" r="48" fill="url(#${m.rim})"/>
+    <circle cx="50" cy="50" r="43" fill="url(#${m.face})" stroke="${m.edge}" stroke-opacity=".45" stroke-width="1"/>
+    <circle cx="50" cy="50" r="38" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1.2"/>
+    ${m.laurel}
+    <circle cx="50" cy="50" r="43" fill="url(#mdl-shine)"/>
+  </svg>`;
+}
+
 // Options for one medal dropdown. Every institute is always available,
 // even if it was already picked for another medal in the same event.
 function medalOptions(ev, medal){
@@ -449,6 +491,76 @@ function medalSelect(ev, medal, catId){
   return sel;
 }
 
+// Drag & drop: hold the ⋮⋮ handle and drag an event to a new spot in its category
+function startDrag(e, row, cat, ev){
+  if(e.button !== undefined && e.button !== 0) return;
+  e.preventDefault();
+  const list = row.parentElement;
+  const rs = [...list.children].filter(el=> el.classList.contains('row') && !el.classList.contains('head'));
+  const fromIdx = rs.indexOf(row);
+  if(fromIdx < 0) return;
+
+  const sy = window.scrollY;
+  const centers = rs.map(r=>{ const b = r.getBoundingClientRect(); return b.top + sy + b.height/2; });
+  const dragH = row.getBoundingClientRect().height;
+  const startPageY = e.clientY + sy;
+  let lastClientY = e.clientY, toIdx = fromIdx, raf = 0;
+
+  row.classList.add('dragging');
+  rs.forEach(r=>{ if(r !== row) r.classList.add('shiftable'); });
+  document.body.classList.add('is-dragging');
+
+  function update(){
+    const dy = (lastClientY + window.scrollY) - startPageY;
+    row.style.transform = `translateY(${dy}px)`;
+    const c = centers[fromIdx] + dy;
+    let t = 0;
+    centers.forEach((cc, k)=>{ if(k !== fromIdx && cc < c) t++; });
+    toIdx = t;
+    rs.forEach((r, k)=>{
+      if(k === fromIdx) return;
+      let shift = 0;
+      if(fromIdx < toIdx && k > fromIdx && k <= toIdx) shift = -dragH;
+      else if(fromIdx > toIdx && k >= toIdx && k < fromIdx) shift = dragH;
+      r.style.transform = shift ? `translateY(${shift}px)` : '';
+    });
+  }
+  // auto-scroll the page when the pointer is near the top / bottom edge
+  function tick(){
+    const margin = 70;
+    let d = 0;
+    if(lastClientY < margin) d = -Math.ceil((margin - lastClientY) / 5);
+    else if(lastClientY > window.innerHeight - margin) d = Math.ceil((lastClientY - (window.innerHeight - margin)) / 5);
+    if(d){ window.scrollBy(0, d); update(); }
+    raf = requestAnimationFrame(tick);
+  }
+  function finish(commit){
+    cancelAnimationFrame(raf);
+    window.removeEventListener('pointermove', onMove);
+    window.removeEventListener('pointerup', onUp);
+    window.removeEventListener('pointercancel', onCancel);
+    document.body.classList.remove('is-dragging');
+    if(commit && toIdx !== fromIdx){
+      const [item] = cat.events.splice(fromIdx, 1);
+      cat.events.splice(toIdx, 0, item);
+      saveLocal();
+      render();
+      apiPost('move_event', {id: ev.id, direction: 'to', position: toIdx});
+    }else{
+      row.classList.remove('dragging');
+      rs.forEach(r=>{ r.classList.remove('shiftable'); r.style.transform = ''; });
+    }
+  }
+  function onMove(e2){ lastClientY = e2.clientY; update(); }
+  function onUp(){ finish(true); }
+  function onCancel(){ finish(false); }
+
+  window.addEventListener('pointermove', onMove);
+  window.addEventListener('pointerup', onUp);
+  window.addEventListener('pointercancel', onCancel);
+  raf = requestAnimationFrame(tick);
+}
+
 function renderCategories(){
   const container = document.getElementById('categories');
   container.innerHTML = '';
@@ -462,9 +574,9 @@ function renderCategories(){
     head.innerHTML = `
       <div class="cat-title"><span class="chev">▾</span><span class="cat-dot"></span><input class="ev-name cat-name-input" style="font-weight:600;font-size:14.5px;" value="${escAttr(cat.name)}"></div>
       <div class="pts">
-        <span class="pt-pill g">G <input type="number" class="pt-input" data-k="gold" value="${cat.points.gold}"></span>
-        <span class="pt-pill s">S <input type="number" class="pt-input" data-k="silver" value="${cat.points.silver}"></span>
-        <span class="pt-pill b">B <input type="number" class="pt-input" data-k="bronze" value="${cat.points.bronze}"></span>
+        <span class="pt-pill g" title="Gold points">${medalSvg('gold',20)}<input type="number" class="pt-input" data-k="gold" value="${cat.points.gold}"></span>
+        <span class="pt-pill s" title="Silver points">${medalSvg('silver',20)}<input type="number" class="pt-input" data-k="silver" value="${cat.points.silver}"></span>
+        <span class="pt-pill b" title="Bronze points">${medalSvg('bronze',20)}<input type="number" class="pt-input" data-k="bronze" value="${cat.points.bronze}"></span>
       </div>
     `;
     head.querySelector('.chev').parentElement.addEventListener('click', (e)=>{
@@ -494,7 +606,10 @@ function renderCategories(){
 
     const headerRow = document.createElement('div');
     headerRow.className = 'row head';
-    headerRow.innerHTML = `<div>Event</div><div>Gold</div><div>Silver</div><div>Bronze</div><div></div>`;
+    headerRow.innerHTML = `<div>Event</div>
+      <div class="medal-head">${medalSvg('gold',22)}Gold</div>
+      <div class="medal-head">${medalSvg('silver',22)}Silver</div>
+      <div class="medal-head">${medalSvg('bronze',22)}Bronze</div><div></div>`;
     body.appendChild(headerRow);
 
     cat.events.forEach(ev=>{
@@ -504,12 +619,22 @@ function renderCategories(){
       nameInp.className = 'ev-name';
       nameInp.value = ev.name;
       nameInp.addEventListener('input', e=>{ ev.name = e.target.value; saveLocal(); saveEventName(ev.id, ev.name); });
-      row.appendChild(nameInp);
+      const nameCell = document.createElement('div');
+      nameCell.className = 'ev-cell';
+      const grip = document.createElement('div');
+      grip.className = 'drag-grip';
+      grip.textContent = '⋮⋮';
+      grip.title = 'Hold and drag to move this event';
+      grip.addEventListener('pointerdown', e=> startDrag(e, row, cat, ev));
+      nameCell.appendChild(grip);
+      nameCell.appendChild(nameInp);
+      row.appendChild(nameCell);
 
       ['gold','silver','bronze'].forEach(medal=>{
         const cell = document.createElement('div');
         cell.className = 'medal-cell';
         cell.dataset.label = medal[0].toUpperCase()+medal.slice(1);
+        cell.insertAdjacentHTML('beforeend', `<span class="cell-medal">${medalSvg(medal,22)}</span>`);
         const sel = medalSelect(ev, medal, cat.id);
         sel.addEventListener('change', e=>{
           ev.winners[medal] = e.target.value || null;
@@ -521,6 +646,9 @@ function renderCategories(){
         row.appendChild(cell);
       });
 
+      const actions = document.createElement('div');
+      actions.className = 'row-actions';
+
       const rmBtn = document.createElement('button');
       rmBtn.className = 'rm-row';
       rmBtn.textContent = '✕';
@@ -530,7 +658,9 @@ function renderCategories(){
         render();
         apiPost('remove_event', {id: ev.id});
       });
-      row.appendChild(rmBtn);
+      actions.appendChild(rmBtn);
+
+      row.appendChild(actions);
 
       body.appendChild(row);
     });
@@ -567,103 +697,8 @@ function updateCatTotals(catEl, cat){
   totalsRow.innerHTML = html;
 }
 
-let revealed = false;   // overall standing stays hidden until "Reveal the winner" is clicked
-function setReveal(on){
-  revealed = on;
-  document.getElementById('revealWrap').hidden = on;
-  document.getElementById('closeRankBtn').hidden = !on;
-  if(!on && confettiRaf){
-    cancelAnimationFrame(confettiRaf); confettiRaf = null;
-    const c = document.getElementById('confetti');
-    c.getContext('2d').clearRect(0, 0, c.width, c.height);
-  }
-  const ranking = document.getElementById('ranking');
-  ranking.hidden = !on;
-  ranking.classList.remove('reveal-in');
-  renderRanking();
-  if(on){ void ranking.offsetWidth; ranking.classList.add('reveal-in'); }
-}
-document.getElementById('closeRankBtn').addEventListener('click', ()=> setReveal(false));
-document.getElementById('revealBtn').addEventListener('click', ()=>{
-  setReveal(true);
-  startConfetti();
-});
-
-// ---- Celebration: confetti burst inside the Overall standing panel ----
-let confettiRaf = null;
-function startConfetti(){
-  if(window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  const canvas = document.getElementById('confetti');
-  const box = canvas.parentElement.getBoundingClientRect();
-  const dpr = window.devicePixelRatio || 1;
-  canvas.width = box.width * dpr;
-  canvas.height = box.height * dpr;
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-  const W = box.width, H = box.height;
-  const colors = ['#e8b64c','#4f9ddb','#5fae72','#e06c9f','#b479c9','#3fb8af','#d97757','#ffffff'];
-  const parts = [];
-  const burst = (x, y, n, angleMin, angleMax)=>{
-    for(let i=0;i<n;i++){
-      const a = (angleMin + Math.random()*(angleMax-angleMin)) * Math.PI/180;
-      const sp = 7 + Math.random()*9;
-      parts.push({
-        x, y, vx:Math.cos(a)*sp, vy:-Math.sin(a)*sp,
-        w:6+Math.random()*6, h:4+Math.random()*5,
-        rot:Math.random()*Math.PI*2, vr:(Math.random()-.5)*.4,
-        color:colors[(Math.random()*colors.length)|0],
-        life:0, max:140 + Math.random()*60
-      });
-    }
-  };
-  // cannons from both bottom corners + a center pop
-  burst(0, H, 60, 40, 80);
-  burst(W, H, 60, 100, 140);
-  burst(W/2, H*0.35, 50, 60, 120);
-  // second wave
-  setTimeout(()=>{ burst(0, H, 40, 45, 80); burst(W, H, 40, 100, 135); }, 600);
-
-  const endBy = performance.now() + 900;
-  if(confettiRaf) cancelAnimationFrame(confettiRaf);
-  (function frame(){
-    ctx.clearRect(0,0,W,H);
-    for(let i=parts.length-1;i>=0;i--){
-      const p = parts[i];
-      p.vy += 0.22; p.vx *= 0.99; p.vy *= 0.99;
-      p.x += p.vx; p.y += p.vy; p.rot += p.vr; p.life++;
-      const alpha = Math.max(0, 1 - Math.max(0, p.life - p.max*0.7) / (p.max*0.3));
-      if(p.life > p.max || p.y > H + 20){ parts.splice(i,1); continue; }
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      ctx.translate(p.x, p.y); ctx.rotate(p.rot);
-      ctx.fillStyle = p.color;
-      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
-      ctx.restore();
-    }
-    if(parts.length || performance.now() < endBy){
-      confettiRaf = requestAnimationFrame(frame);
-    }else{
-      ctx.clearRect(0,0,W,H); confettiRaf = null;
-    }
-  })();
-}
-
 function renderRanking(){
-  saveLocal();
-  if(!revealed) return;
-  const ranking = document.getElementById('ranking');
-  const rows = state.institutes.map(inst=>({inst, score: instituteScore(inst.id)}));
-  rows.sort((a,b)=> b.score - a.score);
-  ranking.innerHTML = rows.map((r,i)=>`
-    <div class="rank ${i===0 && r.score>0 ? 'winner' : ''}">
-      <div class="rank-left">
-        <div class="rank-num ${i===0 && r.score>0 ? 'first':''}">${i+1}</div>
-        <div class="rank-avatar ${r.inst.image ? 'has-img' : ''}" style="--c:${r.inst.color};${r.inst.image ? `background-image:url('${escAttr(r.inst.image)}')` : ''}">${r.inst.image ? '' : escHtml((r.inst.name.trim()[0] || '?').toUpperCase())}</div>
-        <div class="rank-name" style="--c:${r.inst.color}">${escHtml(r.inst.name)}</div>
-      </div>
-      <div class="rank-score">${r.score}</div>
-    </div>
-  `).join('');
+  saveLocal();   // the on-page standing table is gone; the winner is shown by "Reveal the winner"
 }
 
 function escHtml(s){
@@ -740,77 +775,16 @@ document.getElementById('addInstBtn').addEventListener('click', async ()=>{
   }
 });
 
-async function addCategory(name, gold=10, silver=7, bronze=5){
-  const res = await apiPost('add_category', {name, gold, silver, bronze});
+document.getElementById('addCatBtn').addEventListener('click', async ()=>{
+  const res = await apiPost('add_category', {name:'New category', gold:10, silver:7, bronze:5});
   const newId = res && res.id ? res.id : uid('c');
   state.categories.push({
-    id:newId, name, collapsed:false,
-    points:{gold, silver, bronze},
+    id:newId, name:'New category', collapsed:false,
+    points:{gold:10,silver:7,bronze:5},
     events:[]
   });
   render();
-  renderSettings();
-}
-async function removeCategory(id){
-  const cat = state.categories.find(c=>c.id===id);
-  if(!cat) return;
-  const n = cat.events.length;
-  const msg = n
-    ? `Delete "${cat.name}" and its ${n} event${n===1?'':'s'}? Their medals and points will be removed from the standings. This cannot be undone.`
-    : `Delete "${cat.name}"?`;
-  if(!confirm(msg)) return;
-  state.categories = state.categories.filter(c=>c.id!==id);
-  render();
-  renderSettings();
-  apiPost('remove_category', {id});
-}
-
-document.getElementById('addCatBtn').addEventListener('click', ()=> addCategory('New category'));
-
-// ---- Settings: manage categories -----------------------------------
-const settingsOverlay = document.getElementById('settingsOverlay');
-function renderSettings(){
-  const list = document.getElementById('setCatList');
-  if(!state.categories.length){
-    list.innerHTML = '<div class="set-empty">No categories yet. Add one below.</div>';
-    return;
-  }
-  list.innerHTML = state.categories.map(c=>{
-    const n = c.events.length;
-    return `<div class="set-row">
-      <div>
-        <div class="set-name">${escHtml(c.name || 'Untitled')}</div>
-        <div class="set-meta">${n} event${n===1?'':'s'} · G ${escHtml(c.points.gold)} / S ${escHtml(c.points.silver)} / B ${escHtml(c.points.bronze)}</div>
-      </div>
-      <button class="set-del" type="button" data-cat="${escAttr(c.id)}">Delete</button>
-    </div>`;
-  }).join('');
-  list.querySelectorAll('.set-del').forEach(btn=>{
-    btn.addEventListener('click', ()=> removeCategory(btn.dataset.cat));
-  });
-}
-function openSettings(){
-  renderSettings();
-  settingsOverlay.hidden = false;
-  document.getElementById('newCatName').focus();
-}
-function closeSettings(){ settingsOverlay.hidden = true; }
-document.getElementById('settingsBtn').addEventListener('click', openSettings);
-document.getElementById('settingsClose').addEventListener('click', closeSettings);
-settingsOverlay.addEventListener('click', e=>{ if(e.target === settingsOverlay) closeSettings(); });
-document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !settingsOverlay.hidden) closeSettings(); });
-
-async function submitNewCategory(){
-  const nameInp = document.getElementById('newCatName');
-  const name = nameInp.value.trim();
-  if(!name){ nameInp.focus(); return; }
-  const num = id => { const v = parseFloat(document.getElementById(id).value); return isNaN(v) ? 0 : v; };
-  await addCategory(name, num('newCatGold'), num('newCatSilver'), num('newCatBronze'));
-  nameInp.value = '';
-  nameInp.focus();
-}
-document.getElementById('newCatAdd').addEventListener('click', submitNewCategory);
-document.getElementById('newCatName').addEventListener('keydown', e=>{ if(e.key === 'Enter') submitNewCategory(); });
+});
 
 document.getElementById('resetBtn').addEventListener('click', async ()=>{
   if(!confirm('Reset all data to the default blank tally sheet? This cannot be undone.')) return;
@@ -821,8 +795,142 @@ document.getElementById('resetBtn').addEventListener('click', async ()=>{
     state = defaultState();
   }
   render();
-  setReveal(false);
 });
+
+// ---- Reveal the winner ------------------------------------------------
+const revealEl = document.getElementById('reveal');
+const revealList = document.getElementById('revealList');
+const revealCaption = document.getElementById('revealCaption');
+const confettiCanvas = document.getElementById('confetti');
+const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+let revealTimers = [], confettiRaf = 0, revealRows = [];
+
+function later(fn, ms){ revealTimers.push(setTimeout(fn, ms)); }
+function stopReveal(){
+  revealTimers.forEach(clearTimeout);
+  revealTimers = [];
+  cancelAnimationFrame(confettiRaf);
+  confettiCanvas.getContext('2d').clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+}
+function countUp(el, to, ms=900){
+  if(reducedMotion || to === 0){ el.textContent = to; return; }
+  const t0 = performance.now();
+  (function f(now){
+    const p = Math.min(1, (now - t0) / ms);
+    el.textContent = Math.round(to * (1 - Math.pow(1 - p, 3)));
+    if(p < 1) requestAnimationFrame(f);
+  })(t0);
+}
+function launchConfetti(){
+  if(reducedMotion) return;
+  const ctx = confettiCanvas.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const W = window.innerWidth, H = window.innerHeight;
+  confettiCanvas.width = W * dpr; confettiCanvas.height = H * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const colors = ['#f5d974','#e2b643','#6ee7d8','#ff7a90','#8ab4ff','#ffffff'];
+  const parts = Array.from({length:150}, ()=>({
+    x: W/2 + (Math.random() - .5) * 140, y: H * .42,
+    vx: (Math.random() - .5) * 15, vy: -(Math.random() * 13 + 5),
+    g: .35 + Math.random() * .15, w: 6 + Math.random() * 6, h: 4 + Math.random() * 5,
+    rot: Math.random() * 6.28, vr: (Math.random() - .5) * .3,
+    c: colors[Math.floor(Math.random() * colors.length)]
+  }));
+  let frame = 0;
+  cancelAnimationFrame(confettiRaf);
+  (function step(){
+    ctx.clearRect(0, 0, W, H);
+    let alive = 0;
+    parts.forEach(p=>{
+      p.vy += p.g; p.vx *= .99; p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+      if(p.y < H + 30){
+        alive++;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.fillStyle = p.c; ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h);
+        ctx.restore();
+      }
+    });
+    if(alive > 0 && frame++ < 420) confettiRaf = requestAnimationFrame(step);
+    else ctx.clearRect(0, 0, W, H);
+  })();
+}
+
+function rankBadge(i){
+  return i < 3 ? medalSvg(['gold','silver','bronze'][i], 36) : `<span class="rv-num">${i+1}</span>`;
+}
+function buildRevealList(rows){
+  revealList.innerHTML = rows.map((r, i)=>{
+    const img = r.inst.image;
+    const initial = escHtml((r.inst.name.trim()[0] || '?').toUpperCase());
+    return `<div class="rv-row">
+      <div class="rv-rank">${rankBadge(i)}</div>
+      <div class="rv-main">
+        <div class="rank-avatar ${img ? 'has-img' : ''}" style="--c:${r.inst.color};${img ? `background-image:url('${escAttr(img)}')` : ''}">${img ? '' : initial}</div>
+        <div class="rv-name rank-name" style="--c:${r.inst.color}">${escHtml(r.inst.name)}</div>
+        <span class="rv-trophy">🏆</span>
+      </div>
+      <div class="rv-score">0</div>
+    </div>`;
+  }).join('');
+}
+
+function playReveal(){
+  stopReveal();
+  buildRevealList(revealRows);
+  const els = [...revealList.children];
+  const n = els.length;
+  const max = revealRows[0].score;
+  const step = reducedMotion ? 250 : 1000;
+  const pause = reducedMotion ? 300 : 1700;
+  revealCaption.textContent = n > 1 ? 'Drumroll…' : '';
+
+  function revealRow(i){
+    els[i].classList.add('show');
+    countUp(els[i].querySelector('.rv-score'), revealRows[i].score);
+    if(i !== 0) return;
+    // finale: highlight everyone on the top score
+    revealRows.forEach((r, k)=>{ if(r.score === max) els[k].classList.add('winner'); });
+    const names = revealRows.filter(r=> r.score === max).map(r=> r.inst.name);
+    revealCaption.textContent = names.length === 1 ? `🏆 ${names[0]} wins!` : `🤝 It's a tie: ${names.join(' & ')}`;
+    launchConfetti();
+  }
+
+  let t = 700;
+  for(let i = n - 1; i >= 0; i--){
+    if(i === 0 && n > 1){
+      later(()=>{ revealCaption.textContent = 'And the winner is…'; }, t);
+      t += pause;
+    }
+    const idx = i;
+    later(()=> revealRow(idx), t);
+    t += step;
+  }
+}
+
+function openReveal(){
+  const rows = state.institutes
+    .map(inst=>({inst, score: instituteScore(inst.id)}))
+    .sort((a, b)=> b.score - a.score);
+  if(!rows.length) return;
+  if(rows[0].score <= 0){
+    alert('No medals have been assigned yet. Pick some winners first, then reveal.');
+    return;
+  }
+  revealRows = rows;
+  revealEl.hidden = false;
+  document.body.style.overflow = 'hidden';
+  playReveal();
+}
+function closeReveal(){
+  stopReveal();
+  revealEl.hidden = true;
+  document.body.style.overflow = '';
+}
+document.getElementById('revealBtn').addEventListener('click', openReveal);
+document.getElementById('revealClose').addEventListener('click', closeReveal);
+document.getElementById('revealReplay').addEventListener('click', playReveal);
+revealEl.addEventListener('click', e=>{ if(e.target === revealEl) closeReveal(); });
+document.addEventListener('keydown', e=>{ if(e.key === 'Escape' && !revealEl.hidden) closeReveal(); });
 
 // ---- Light / dark theme --------------------------------------------
 const THEME_KEY = "intramurals-theme";
